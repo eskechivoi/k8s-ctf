@@ -36,6 +36,13 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: "challenge-commons-downloader"
+          image: "{{ .Values.downloader.repository }}:{{ .Values.downloader.tag }}"
+          imagePullPolicy: {{ .Values.downloader.pullPolicy }}
+          volumeMounts: 
+            - name: challenge-commons
+              mountPath: /app 
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.global.configuration.api.securityContext }}
@@ -60,12 +67,17 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.global.configuration.api.volumeMounts }}
           volumeMounts:
+            - name: challenge-commons
+              mountPath: /app 
+          {{- with .Values.global.configuration.api.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.global.configuration.api.volumes }}
       volumes:
+        - name: challenge-commons
+          emptyDir:
+            sizeLimit: 1Gi
+      {{- with .Values.global.configuration.api.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.global.nodeSelector }}

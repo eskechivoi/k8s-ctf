@@ -3,8 +3,7 @@ Frontend, API and helm charts to easily deploy CTF challenges on kubernetes.
 
 ## ctf-api
 Offers some endpoints to update the CTF challenges' charts and deploy a new challenge for a CTF player.
-The `ctf-chart` is mounted as a volume in the `ctf-api` Pod. The new dependencies are added to this mounted volume by the API.
-To make the dependency changes persistent, this 'parent chart' is uploaded to a PVC that is mounted on the API's Pod.
+The `challenge-commons` chart is mounted as a volume in the `ctf-api` Pod. The new dependencies are added to this mounted volume by the API. An init container is in charge of downloading the `challenge-commons` chart from GitHub and adding it to the mounted volume.
 
 ### Endpoints:
 - /api/dependencies 

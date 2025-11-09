@@ -3,6 +3,11 @@ image:
   pullPolicy: IfNotPresent
   tag: "0.1.0"
 
+downloader:
+  repository: busybox
+  pullPolicy: IfNotPresent
+  tag: "stable"
+
 selectorLabels:
   component: 'api'
 
