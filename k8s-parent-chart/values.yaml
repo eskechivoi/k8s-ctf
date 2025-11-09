@@ -21,6 +21,9 @@ global:
   tolerations: []
 
   affinity: {}
+
+  labels:
+    application: "k8sctf"
   
   configuration:
     api:

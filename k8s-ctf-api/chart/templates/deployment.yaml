@@ -3,15 +3,19 @@ kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
+  {{- with .Values.global.labels }}
   labels:
-    {{- include ".Values.global.labels" . | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.global.autoscaling.enabled }}
   replicas: {{ .Values.global.configuration.api.replicaCount }}
   {{- end }}
   selector:
+    {{- with .Values.selectorLabels }}
     matchLabels:
-      {{- include ".Values.selectorLabels" . | nindent 6 }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
   template:
     metadata:
       {{- with .Values.global.configuration.api.podAnnotations }}
@@ -27,7 +31,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include ".Values.serviceAccountName" . }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
       {{- with .Values.global.configuration.api.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
