@@ -17,10 +17,10 @@ The `challenge-commons` chart is mounted as a volume in the `ctf-api` Pod. The n
 
 ## A lot of charts, init?
 Well, every chart folder has it's own role in this whole architecture:
-- `challenge-commons` : Is the 'parent chart' for the challenges. It is mounted to the API Pod.
+- `challenge-commons` : Is the 'parent chart' for the challenges. It is mounted on the API Pod.
     - Defines the Ingress rules for the challenges.
     - Defines global values for the challenges' charts.
-- `k8s-ctf-chart` : It is the 'parent chart' for the backend Pod and the frontend. 
+- `k8s-ctf-chart` : It is the 'parent chart' for the backend and the frontend Pods. 
     - Defines the Ingress rules to access the backend and the frontend.
     - Defines global values like replicas, labels...
 - `challenge-chart-template` : To create a new chart for a challenge you can use this template.
