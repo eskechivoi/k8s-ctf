@@ -1,7 +1,7 @@
 image:
   repository: nginx
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "stable-perl"
 
 selectorLabels:
   component: 'challengeName'
@@ -9,7 +9,7 @@ selectorLabels:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8080
+  targetPort: 80
   name: http
 
 livenessProbe:

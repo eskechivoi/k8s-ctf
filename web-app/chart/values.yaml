@@ -1,7 +1,7 @@
 image:
-  repository: nginx
+  repository: ctf-frontend
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "0.1.0"
 
 selectorLabels:
   component: 'frontend'

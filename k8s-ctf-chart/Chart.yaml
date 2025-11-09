@@ -1,6 +1,13 @@
 apiVersion: v2
-name: k8s-ctf-chart
-description: Parent Chart for CTF challenges
+name: k8s-ctf
+description: Parent chart for API and Frontend
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
+dependencies:
+  - name: ctf-api
+    version: 0.1.0
+    repository: "file://../k8s-ctf-api/chart"
+  - name: ctf-frontend
+    version: 0.1.0
+    repository: "file://../web-app/chart"

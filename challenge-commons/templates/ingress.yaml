@@ -2,9 +2,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "k8s-parent-chart.fullname" . }}
+  name: "{{ .Chart.Name }}-ingress"
+  {{- with .Values.global.labels }}
   labels:
-    {{- include "k8s-parent-chart.labels" . | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -25,8 +27,7 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
+    - http:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
@@ -35,9 +36,12 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "k8s-parent-chart.fullname" $ }}
+                name: {{ .serviceName }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ .port }}
           {{- end }}
+      {{- if .host }}
+      host: {{ .host | quote }}
+      {{- end }}
     {{- end }}
 {{- end }}

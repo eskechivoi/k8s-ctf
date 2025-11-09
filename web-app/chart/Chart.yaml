@@ -1,5 +1,5 @@
 apiVersion: v2
-name: k8sCtfFrontend
+name: ctf-frontend
 description: Web app to work with CTF challenges
 type: application
 version: 0.1.0
