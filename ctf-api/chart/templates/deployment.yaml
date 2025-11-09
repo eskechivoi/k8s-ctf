@@ -40,9 +40,14 @@ spec:
         - name: "challenge-commons-downloader"
           image: "{{ .Values.downloader.repository }}:{{ .Values.downloader.tag }}"
           imagePullPolicy: {{ .Values.downloader.pullPolicy }}
+          command:
+            - "/opt/configScript.sh"
           volumeMounts: 
             - name: challenge-commons
               mountPath: /app 
+          {{- with .Values.global.configuration.api.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.global.configuration.api.securityContext }}
@@ -53,7 +58,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: "PARENT_CHART_PATH"
-              value: {{ .Values.global.configuration.challengeChartPath }}
+              value: {{ .Values.global.configuration.api.challengeChartPath }}
           ports:
             - name: http
               containerPort: 8080

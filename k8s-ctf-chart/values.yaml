@@ -39,11 +39,16 @@ global:
         requests:
           cpu: 100m
           memory: 128Mi
-      volumes: []
-      volumeMounts: []
+      volumes:
+      - name: configScript
+        configMap:
+          name: ctf-api-configScript
+      volumeMounts:
+        - name: configScript
+          path: /opt/
       challengeChartPath: "/app/challenge-commons"
       configScript: 
-        - name: 
+        - name: ctf-api-configScript
           script: |
             #!/bin/bash
             git clone https://github.com/eskechivoi/k8s-ctf.git /app

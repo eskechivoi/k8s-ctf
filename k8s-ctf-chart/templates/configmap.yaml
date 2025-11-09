@@ -7,7 +7,9 @@ metadata:
   name: {{ .name }}
   namespace: {{ $.Values.global.namespace }}
 data:
-  configScript.sh: {{ .script }}
+  configScript.sh: |
+{{ .script | nindent 4 }}
+---
 {{- end }}
 {{- end }}
 {{- end }}
