@@ -10,6 +10,8 @@ To make the dependency changes persistent, this 'parent chart' is uploaded to a 
 - /api/dependencies 
     - GET : Returns all the challenge charts installed in the cluster.
     - POST : Installs a new challenge in the cluster.
+        - challenge_name: str, chart_file: file (in .tar format) - (as application/json)
 
 - /api/deploy
-    - POST: user_name, challenge_name (as application/json) -> Deploys a new challenge for the user.
+    - POST: Deploys a new challenge for the user.
+        - user_name: str, challenge_name: str (as application/json)
