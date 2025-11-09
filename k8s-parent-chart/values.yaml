@@ -11,7 +11,7 @@ global:
     create: true
     automount: true
     annotations: {}
-    name: ""
+    name: "default-pod-serviceaccount"
 
   imagePullSecrets:
     -name : ""

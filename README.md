@@ -24,5 +24,6 @@ Well, every chart folder has it's own role in this whole architecture:
 - `k8s-parent-chart` : It is the 'parent chart' for the backend Pod and the frontend. 
     - Defines the Ingress rules to access the backend and the frontend.
     - Defines global values like replicas, labels...
+- `challenge-chart-template` : To create a new chart for a challenge you can use this template.
 - API chart : Deployment and service for the backend.
 - Frontend chart: Deployment and service for the frontend.
