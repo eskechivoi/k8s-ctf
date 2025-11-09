@@ -2,7 +2,7 @@ import os
 from app import create_app
 from pathlib import Path
 
-PARENT_CHART_PATH = os.environ.get('PARENT_CHART_PATH', '/app/k8sCtfChart')
+PARENT_CHART_PATH = os.environ.get('PARENT_CHART_PATH', '/app/challenge-commons')
 CHARTS_STORAGE_DIR = os.path.join(PARENT_CHART_PATH, 'charts')
 CHART_YAML_PATH = os.path.join(PARENT_CHART_PATH, 'Chart.yaml')
 

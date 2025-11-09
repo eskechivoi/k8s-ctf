@@ -41,7 +41,7 @@ COPY gunicorn_config.py .
 COPY main.py .
 COPY app ./app
 
-ENV PARENT_CHART_PATH="/app/k8sCtfChart"
+ENV PARENT_CHART_PATH="/app/challenge-commons"
 ENV FLASK_APP="main.py"
 
 EXPOSE 8000

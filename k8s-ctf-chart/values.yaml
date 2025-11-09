@@ -41,12 +41,12 @@ global:
           memory: 128Mi
       volumes: []
       volumeMounts: []
-      downloader:
-        command:
-         - "git"
-         - "clone"
-         - "https://github.com/eskechivoi/k8s-ctf.git"
-         - "/app"
+      challengeChartPath: "/app/challenge-commons"
+      configScript: 
+        - name: 
+          script: |
+            #!/bin/bash
+            git clone https://github.com/eskechivoi/k8s-ctf.git /app
 
     frontend:
       replicaCount: 1
