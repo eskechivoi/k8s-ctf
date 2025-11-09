@@ -7,7 +7,7 @@ appVersion: "0.1.0"
 dependencies:
   - name: ctf-api
     version: 0.1.0
-    repository: "file://../k8s-ctf-api/chart"
+    repository: "file://../ctf-api/chart"
   - name: ctf-frontend
     version: 0.1.0
     repository: "file://../web-app/chart"
