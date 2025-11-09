@@ -1,5 +1,5 @@
 global:
-  namespace: "k8sctf"
+  namespace: "ctf-challenges"
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -26,16 +26,10 @@ global:
     challenge:
       replicaCount: 1
       podAnnotations: {}
-      podLabels: {}
+      podLabels:
+        type: "ctf-challenge"
       podSecurityContext: {}
       securityContext: {}
-      resources:
-        limits:
-          cpu: 100m
-          memory: 128Mi
-        requests:
-          cpu: 100m
-          memory: 128Mi
       volumes: []
       volumeMounts: []
 

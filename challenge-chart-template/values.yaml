@@ -1,0 +1,30 @@
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: ""
+
+selectorLabels:
+  component: 'challengeName'
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  name: http
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
