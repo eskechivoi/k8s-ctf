@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: helm-installer-role
+  namespace: {{ .Values.global.namespace }}
+rules:
+- apiGroups: ["*"]
+  resources: ["deployments", "services", "secrets", "configmaps", "ingresses", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

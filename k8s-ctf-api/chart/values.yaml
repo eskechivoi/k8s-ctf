@@ -6,6 +6,10 @@ image:
 selectorLabels:
   component: 'api'
 
+installerRoleName: helm-installer-role
+serviceAccountName: helm-deployer-sa
+roleBindingName: helm-installer-binding
+
 service:
   type: ClusterIP
   port: 80

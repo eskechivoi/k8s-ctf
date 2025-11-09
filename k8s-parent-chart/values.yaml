@@ -1,4 +1,5 @@
 global:
+  namespace: "k8sctf"
   autoscaling:
     enabled: false
     minReplicas: 1
