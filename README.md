@@ -15,3 +15,14 @@ To make the dependency changes persistent, this 'parent chart' is uploaded to a 
 - /api/deploy
     - POST: Deploys a new challenge for the user.
         - user_name: str, challenge_name: str (as application/json)
+
+## A lot of charts, init?
+Well, every chart folder has it's own role in this whole architecture:
+- `k8s-ctf-chart` : Is the 'parent chart' for the challenges. It is mounted to the API Pod.
+    - Defines the Ingress rules for the challenges.
+    - Defines global values for the challenges' charts.
+- `k8s-parent-chart` : It is the 'parent chart' for the backend Pod and the frontend. 
+    - Defines the Ingress rules to access the backend and the frontend.
+    - Defines global values like replicas, labels...
+- API chart : Deployment and service for the backend.
+- Frontend chart: Deployment and service for the frontend.
