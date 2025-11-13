@@ -13,8 +13,7 @@ global:
     annotations: {}
     name: "default-pod-serviceaccount"
 
-  imagePullSecrets:
-    -name : ""
+  imagePullSecrets: []
 
   nodeSelector: {}
 
@@ -45,7 +44,7 @@ global:
           name: ctf-api-configscript
       volumeMounts:
         - name: configscript
-          path: /opt/
+          mountPath: /opt/
       challengeChartPath: "/app/challenge-commons"
       configScript: 
         - name: ctf-api-configscript
@@ -80,9 +79,9 @@ ingress:
         - path: /api
           pathType: Prefix
           serviceName: ctf-api-service
-          port: http
+          port: 80
         - path: /
           pathType: Prefix
           serviceName: ctf-frontend-service
-          port: http
+          port: 80
       host: localhost

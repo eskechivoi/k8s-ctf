@@ -3,9 +3,6 @@ image:
   pullPolicy: IfNotPresent
   tag: "0.1.0"
 
-selectorLabels:
-  component: 'frontend'
-
 service:
   type: ClusterIP
   port: 80

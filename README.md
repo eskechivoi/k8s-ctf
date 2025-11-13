@@ -35,10 +35,17 @@ Assumming you're using a local setup like minikube, just build the images locall
 Once you have the images accesible from your cluster, run the following command:
 
 ```sh
+cd k8s-ctf-chart
 helm dependency build
-helm install k8s-ctf ./k8s-ctf-chart \
+helm install k8s-ctf . \
   --namespace k8sctf \
   --create-namespace
 ```
 
 This will create the k8sctf namespace and install both the API and the frontend in that namespace.
+
+## Uninstall
+
+```sh
+helm uninstall k8s-ctf --namespace k8sctf
+```

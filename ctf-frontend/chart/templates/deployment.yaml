@@ -12,10 +12,8 @@ spec:
   replicas: {{ .Values.global.configuration.frontend.replicaCount }}
   {{- end }}
   selector:
-    {{- with .Values.selectorLabels }}
     matchLabels:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
+      {{- include "k8s-ctf.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.global.configuration.frontend.podAnnotations }}
@@ -23,9 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- with .Values.global.configuration.frontend.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "k8s-ctf.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:

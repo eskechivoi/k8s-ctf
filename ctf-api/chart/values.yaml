@@ -8,9 +8,6 @@ downloader:
   pullPolicy: IfNotPresent
   tag: "stable"
 
-selectorLabels:
-  component: 'api'
-
 installerRoleName: helm-installer-role
 serviceAccountName: helm-deployer-sa
 roleBindingName: helm-installer-binding
