@@ -10,4 +10,4 @@ dependencies:
     repository: "file://../ctf-api/chart"
   - name: ctf-frontend
     version: 0.1.0
-    repository: "file://../web-app/chart"
+    repository: "file://../ctf-frontend/chart"

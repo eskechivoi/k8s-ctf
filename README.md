@@ -36,7 +36,7 @@ Once you have the images accesible from your cluster, run the following command:
 
 ```sh
 helm dependency build
-helm install k8s-ctf k8s-ctf-chart \
+helm install k8s-ctf ./k8s-ctf-chart \
   --namespace k8sctf \
   --create-namespace
 ```
