@@ -60,8 +60,8 @@ spec:
             - name: "PARENT_CHART_PATH"
               value: {{ .Values.global.configuration.api.challengeChartPath }}
           ports:
-            - name: http
-              containerPort: 8080
+            - name: {{ .Values.service.name }}
+              containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
           {{- with .Values.global.configuration.api.livenessProbe }}
           livenessProbe:

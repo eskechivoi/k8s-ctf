@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY --from=build /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=build /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=build /usr/local/bin/gunicorn /usr/local/bin/
 
 COPY --from=build /usr/local/bin/helm /usr/local/bin/helm
