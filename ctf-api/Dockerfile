@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /src
 
 COPY --from=build /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=build /usr/local/bin/gunicorn /usr/local/bin/
@@ -41,9 +41,9 @@ COPY gunicorn_config.py .
 COPY main.py .
 COPY app ./app
 
-ENV PARENT_CHART_PATH="/app/challenge-commons"
+ENV PARENT_CHART_PATH="/mnt/challenge-commons"
 ENV FLASK_APP="main.py"
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--config", "gunicorn_config.py", "main:app"]
+CMD ["gunicorn", "--config", "/src/gunicorn_config.py", "main:app"]

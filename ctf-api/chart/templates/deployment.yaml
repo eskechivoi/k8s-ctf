@@ -13,7 +13,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "k8s-ctf.selectorLabels" . | nindent 6 }}
+      {{- include "cft-api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.global.configuration.api.podAnnotations }}
@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "k8s-ctf.selectorLabels" . | nindent 8 }}
+        {{- include "cft-api.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -36,14 +36,10 @@ spec:
         - name: "challenge-commons-downloader"
           image: "{{ .Values.downloader.repository }}:{{ .Values.downloader.tag }}"
           imagePullPolicy: {{ .Values.downloader.pullPolicy }}
-          command:
-            - "/opt/configScript.sh"
+          command: {{ .Values.initCommand | toYaml | nindent 12 }}
           volumeMounts: 
             - name: challenge-commons
-              mountPath: /app 
-          {{- with .Values.global.configuration.api.volumeMounts }}
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+              mountPath: /mnt 
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.global.configuration.api.securityContext }}
@@ -54,7 +50,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: "PARENT_CHART_PATH"
-              value: {{ .Values.global.configuration.api.challengeChartPath }}
+              value: {{ .Values.challengeChartPath }}
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.targetPort }}
@@ -73,7 +69,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: challenge-commons
-              mountPath: /app 
+              mountPath: /mnt 
           {{- with .Values.global.configuration.api.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

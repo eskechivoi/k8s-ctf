@@ -1,12 +1,19 @@
 image:
-  repository: k8s-ctf-api
+  repository: ctf-api
   pullPolicy: IfNotPresent
   tag: "0.1.0"
 
 downloader:
-  repository: busybox
+  repository: alpine/git
   pullPolicy: IfNotPresent
-  tag: "stable"
+  tag: "v2.49.1"
+
+challengeChartPath: "/mnt/challenge-commons"
+initCommand:
+  - "git"
+  - "clone"
+  - "https://github.com/eskechivoi/k8s-ctf.git"
+  - "/mnt"
 
 installerRoleName: helm-installer-role
 serviceAccountName: helm-deployer-sa
@@ -15,7 +22,7 @@ roleBindingName: helm-installer-binding
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8080
+  targetPort: 8000
   name: http
 
 livenessProbe:

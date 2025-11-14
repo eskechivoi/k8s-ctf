@@ -14,7 +14,5 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: {{ .Values.service.name }}
-  {{- with .Values.selectorLabels }}
   selector:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- include "cft-api.selectorLabels" . | nindent 4 }}

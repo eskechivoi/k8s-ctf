@@ -44,6 +44,13 @@ helm install k8s-ctf . \
 
 This will create the k8sctf namespace and install both the API and the frontend in that namespace.
 
+### Build images inside minikube
+
+```sh
+minikube docker-env
+& minikube -p minikube docker-env --shell powershell | Invoke-Expression # In powershell
+```
+
 ## Uninstall
 
 ```sh

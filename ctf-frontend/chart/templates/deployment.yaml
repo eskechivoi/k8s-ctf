@@ -13,7 +13,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "k8s-ctf.selectorLabels" . | nindent 6 }}
+      {{- include "cft-frontend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.global.configuration.frontend.podAnnotations }}
@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "k8s-ctf.selectorLabels" . | nindent 8 }}
+        {{- include "cft-frontend.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
