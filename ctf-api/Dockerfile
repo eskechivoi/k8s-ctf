@@ -43,6 +43,7 @@ COPY app ./app
 
 ENV PARENT_CHART_PATH="/mnt/challenge-commons"
 ENV FLASK_APP="main.py"
+ENV CHALLENGES_NAMESPACE="ctf-challenges"
 
 EXPOSE 8000
 

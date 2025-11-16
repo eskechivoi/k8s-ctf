@@ -51,6 +51,8 @@ spec:
           env:
             - name: "PARENT_CHART_PATH"
               value: {{ .Values.challengeChartPath }}
+            - name: "CHALLENGES_NAMESPACE"
+              value: {{ .Values.global.challengesNamespace }}
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.targetPort }}

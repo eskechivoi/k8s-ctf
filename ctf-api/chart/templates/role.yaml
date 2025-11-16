@@ -2,8 +2,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Values.installerRoleName }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.challengesNamespace }}
 rules:
 - apiGroups: ["*"]
-  resources: ["deployments", "services", "secrets", "configmaps", "ingresses", "persistentvolumeclaims"]
+  resources: ["deployments", "services", "secrets", "configmaps", "ingresses", "persistentvolumeclaims", "serviceaccounts"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

@@ -9,12 +9,13 @@ def update_dependencies(parent_chart_path):
         cwd=parent_chart_path
     )
 
-def install(release_name, parent_chart_path, set_value):
+def install(release_name, parent_chart_path, set_value, challenges_namespace):
     helm_command = [
         'helm', 'install',
         release_name,
         parent_chart_path,
-        '--set', set_value
+        '--set', set_value,
+        '--namespace', challenges_namespace
     ]
     return subprocess.run(
         helm_command,

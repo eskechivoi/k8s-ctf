@@ -1,5 +1,6 @@
 global:
   namespace: "k8sctf"
+  challengesNamespace: "ctf-challenges"
   autoscaling:
     enabled: false
     minReplicas: 1
