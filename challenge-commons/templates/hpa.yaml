@@ -2,7 +2,8 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "challenge-commons.fullname" . }}
+  name: "{{ include "challenge-commons.fullname" . }}-hpa"
+  namespace: {{ .Values.global.namespace }}
   labels:
     {{- include "challenge-commons.labels" . | nindent 4 }}
 spec:
