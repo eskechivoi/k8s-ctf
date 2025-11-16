@@ -25,43 +25,57 @@ def get_dependencies_controller():
 
 def add_dependency_controller():
     """
-    Receives a compressed chart, saves it locally and adds the dependency
-    to the parent chart's Chart.yaml
+    Receives a compressed chart, saves it locally, reads its metadata, and 
+    adds the dependency to the parent chart's Chart.yaml
     (POST /api/dependencies)
     """
-    # Entry validation
-    challenge_name = request.form.get('challenge_name')
     chart_file = request.files.get('chart_file')
     
-    if not challenge_name or not chart_file:
+    if not chart_file:
         return jsonify({"error": "Missing challenge_name or chart_file."}), 400
-
-    safe_name = secure_filename(challenge_name).lower()
     
     charts_storage_dir = app.config['CHARTS_STORAGE_DIR']
     parent_chart_path = app.config['PARENT_CHART_PATH']
     chart_yaml_path = app.config['CHART_YAML_PATH']
     
-    app.logger.info(f"Processing new chart: {safe_name}")
-    uploaded_file_path = os.path.join('/tmp', f'{safe_name}.tgz')
-
-    # Save and uncompress the .tar chart into the charts subfold
+    app.logger.info(f"Processing new chart")
+    # --- 1. Save, Descompress and Obtain the Chart's path ---
     try:
-        save_chart(chart_file, charts_storage_dir, safe_name)
+        unpacked_chart_dir = save_chart(chart_file, charts_storage_dir)
+        app.logger.info(f"Chart extracted to: {unpacked_chart_dir}")
+
+        # --- 2. Read the Chart.yaml from the uploaded Chart
+        uploaded_chart_yaml_path = os.path.join(unpacked_chart_dir, 'Chart.yaml')     
+        uploaded_chart_data = read_chart_yaml(uploaded_chart_yaml_path)
+        if not uploaded_chart_data:
+             raise FileNotFoundError(f"Could not read Chart.yaml from the extracted path: {unpacked_chart_dir}")        
+        real_chart_name = uploaded_chart_data.get('name')
+        real_chart_version = uploaded_chart_data.get('version')  
+        if not real_chart_name or not real_chart_version:
+             raise ValueError("Chart.yaml in uploaded file is missing 'name' or 'version'.")
+        app.logger.info(f"Read Chart details: Name={real_chart_name}, Version={real_chart_version}")
     except tarfile.TarError as e:
         app.logger.error(f"Error uncompressing the chart: {e}")
-        return jsonify({"error": "Uploaded file is not a valid tar.gz file."}), 400
+        return jsonify({"error": "Uploaded file is not a valid Helm tar.gz file or its structure is invalid."}), 400
+    except (FileNotFoundError, ValueError) as e:
+         app.logger.error(f"Error validating uploaded Chart: {e}")
+         return jsonify({"error": str(e)}), 400
     except Exception as e:
-        app.logger.error(f"Error trying to save/extract the chart: {e}")
-        return jsonify({"error": f"Internal error trying to save the file: {e}"}), 500
-    finally:
-        if os.path.exists(uploaded_file_path):
-            os.remove(uploaded_file_path)
+        app.logger.error(f"Internal error trying to save/extract the chart: {e}")
+        return jsonify({"error": f"Internal error: {e}"}), 500
 
-    # Add the new dependency
-    new_dependency = add_dependency(chart_yaml_path, safe_name)
+    # --- 3. Add new dependency to parent Chart ---
+    new_dependency_config = {
+        'name': real_chart_name,
+        'version': real_chart_version,
+    }
+    try:
+        new_dependency = add_dependency(chart_yaml_path, new_dependency_config)
+    except Exception as e:
+        app.logger.error(f"Error adding dependency to parent Chart.yaml: {e}")
+        return jsonify({"error": f"Error updating parent Chart.yaml: {e}"}), 500
 
-    # Run helm dependency update
+    # --- 4. Run helm dependency update ---
     try:
         app.logger.info(f"Running helm dependency update in {parent_chart_path}")
         result = update_dependencies(parent_chart_path)
@@ -70,11 +84,11 @@ def add_dependency_controller():
     except subprocess.CalledProcessError as e:
         app.logger.error(f"Error in helm dependency update: {e.stderr}")
         return jsonify({
-            "message": "Chart saved but failing while running helm dependency update.",
+            "message": "Chart saved but failed while running helm dependency update.",
             "helm_error": e.stderr
         }), 500
         
     return jsonify({
-        "message": f"Chart '{challenge_name}' saved and dependency successfully added.",
+        "message": f"Chart '{real_chart_name}' (v{real_chart_version}) saved and dependency successfully added.",
         "dependency_config": new_dependency
     }), 201

@@ -1,5 +1,6 @@
 import yaml
 from flask import current_app as app, abort
+import os
 
 def read_chart_yaml(file_path):
     """Reads and parses Chart.yaml."""
@@ -11,7 +12,9 @@ def read_chart_yaml(file_path):
         return None
     except yaml.YAMLError as e:
         app.logger.error(f"Error parsing yaml in {file_path}: {e}")
-        abort(500, description="Error reading Chart.yaml file.")
+        if os.path.exists(file_path):
+            abort(500, description="Error reading Chart.yaml file.")
+        return None
 
 def write_chart_yaml(file_path, data):
     """Writes data back to Chart.yaml."""
@@ -22,12 +25,20 @@ def write_chart_yaml(file_path, data):
         app.logger.error(f"Error writting in file {file_path}: {e}")
         abort(500, description="Error saving file Chart.yaml.")
 
-def add_dependency(file_path, safe_name):
+def add_dependency(file_path, new_dependency_config):
+    """
+    Adds or updates a dependency in the parent Chart.yaml using the real 
+    metadata from the uploaded chart.
+    
+    :param file_path: Path to the parent Chart.yaml
+    :param new_dependency_config: Dict containing 'name', 'version', etc.
+    :return: The added dependency configuration.
+    """
+    
     # Read and update Chart.yaml
     chart_data = read_chart_yaml(file_path)
     
     if chart_data is None:
-        # Create a basic Chart.yaml 
         chart_data = {
             'apiVersion': 'v2',
             'name': 'k8s-ctf-chart',
@@ -39,19 +50,16 @@ def add_dependency(file_path, safe_name):
         }
     dependencies = chart_data.get('dependencies', [])
     
-    # Create new dependency entry
-    # Repository points to file://./charts, that is the subchart folder
-    new_dependency = {
-        'name': safe_name,
-        'version': '0.1.0', 
-        'repository': 'file://./charts',
-        'condition': f'{safe_name}.enabled', 
-        'alias': safe_name 
-    }
-    dependencies = [d for d in dependencies if d.get('name') != safe_name]
-    dependencies.append(new_dependency)
+    chart_name = new_dependency_config['name']
+    if 'alias' not in new_dependency_config:
+        new_dependency_config['alias'] = chart_name
+    if 'condition' not in new_dependency_config:
+        new_dependency_config['condition'] = f'{chart_name}.enabled'
+
+    dependencies = [d for d in dependencies if d.get('name') != chart_name]
+    dependencies.append(new_dependency_config)
+    
     chart_data['dependencies'] = dependencies
     
-    # Write the updated Chart.yaml
     write_chart_yaml(file_path, chart_data)
-    return new_dependency
+    return new_dependency_config

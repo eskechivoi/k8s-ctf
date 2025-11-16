@@ -2,8 +2,11 @@ import subprocess
 
 def update_dependencies(parent_chart_path):
     return subprocess.run(
-        ['helm', 'dependency', 'update', parent_chart_path],
-        capture_output=True, text=True, check=True
+        ['helm', 'dependency', 'update', '.'],
+        capture_output=True,
+        text=True,
+        check=True,
+        cwd=parent_chart_path
     )
 
 def install(release_name, parent_chart_path, set_value):
