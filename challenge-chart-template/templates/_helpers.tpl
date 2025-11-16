@@ -2,32 +2,35 @@
 Expand the name of the chart.
 */}}
 {{- define "challenge.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default .Chart.Name .Values.nameOverride | lower | replace "." "-" | replace "_" "-" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
+Ensures compliance with DNS-1035 (lowercase alphanumeric and '-')
 */}}
 {{- define "challenge.fullname" -}}
 {{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- .Values.fullnameOverride | lower | replace "." "-" | replace "_" "-" | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- $name := default .Chart.Name .Values.nameOverride | lower | replace "." "-" | replace "_" "-" }}
+{{- $releaseName := .Release.Name | lower | replace "." "-" | replace "_" "-" }}
+{{- if contains $name $releaseName }}
+{{- $releaseName | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" $releaseName $name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
+The version is converted to standard format using 'replace' for common non-DNS characters.
 */}}
 {{- define "challenge.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | lower | replace "." "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -47,5 +50,5 @@ Selector labels
 */}}
 {{- define "challenge.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "challenge.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/instance: {{ .Release.Name | lower | replace "." "-" | replace "_" "-" }}
 {{- end }}
