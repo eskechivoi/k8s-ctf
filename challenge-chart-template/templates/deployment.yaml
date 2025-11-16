@@ -19,9 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- with .Values.global.configuration.challenge.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "challenge.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -33,7 +31,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "challenge.fullname" . }}
           {{- with .Values.global.configuration.challenge.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
