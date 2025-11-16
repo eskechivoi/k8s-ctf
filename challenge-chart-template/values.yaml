@@ -28,3 +28,16 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  tls: []
+  hosts:
+    - paths:
+        - path: /
+          pathType: Prefix
+          serviceName: ctfChallengeName-service
+          port: 80
+      host: localhost

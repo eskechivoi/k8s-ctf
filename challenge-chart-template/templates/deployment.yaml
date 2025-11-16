@@ -1,21 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ include "challenge.fullname" . }}
   namespace: {{ .Values.global.namespace }}
-  {{- with .Values.global.labels }}
   labels:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- include "challenge.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.global.autoscaling.enabled }}
   replicas: {{ .Values.global.configuration.challenge.replicaCount }}
   {{- end }}
   selector:
-    {{- with .Values.selectorLabels }}
     matchLabels:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
+      {{- include "challenge.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.global.configuration.challenge.podAnnotations }}

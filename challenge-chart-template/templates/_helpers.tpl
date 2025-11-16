@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "challenge-commons.name" -}}
+{{- define "challenge.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "challenge-commons.fullname" -}}
+{{- define "challenge.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "challenge-commons.chart" -}}
+{{- define "challenge.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "challenge-commons.labels" -}}
-helm.sh/chart: {{ include "challenge-commons.chart" . }}
-{{ include "challenge-commons.selectorLabels" . }}
+{{- define "challenge.labels" -}}
+helm.sh/chart: {{ include "challenge.chart" . }}
+{{ include "challenge.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "challenge-commons.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "challenge-commons.name" . }}
+{{- define "challenge.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "challenge.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "challenge-commons.serviceAccountName" -}}
+{{- define "challenge.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "challenge-commons.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "challenge.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

@@ -1,3 +1,4 @@
+import json
 import subprocess
 from flask import current_app as app, jsonify, request
 from werkzeug.utils import secure_filename
@@ -38,7 +39,7 @@ def deploy_challenge_controller():
         return jsonify({
             "error": "Helm deployment failed.",
             "helm_error": e.stderr.split('\n'),
-            "command": ' '.join(result.args)
+            "command": ' '.join(e.cmd)
         }), 500
     except subprocess.TimeoutExpired:
         app.logger.error("Helm command timed out.")

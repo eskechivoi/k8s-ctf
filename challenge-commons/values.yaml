@@ -11,7 +11,7 @@ global:
     create: true
     automount: true
     annotations: {}
-    name: ""
+    name: "challenge-commons-serviceaccount"
 
   imagePullSecrets:
     -name : ""
@@ -32,19 +32,3 @@ global:
       securityContext: {}
       volumes: []
       volumeMounts: []
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
