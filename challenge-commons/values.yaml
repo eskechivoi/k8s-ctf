@@ -13,8 +13,7 @@ global:
     annotations: {}
     name: "challenge-commons-serviceaccount"
 
-  imagePullSecrets:
-    -name : ""
+  imagePullSecrets: []
 
   nodeSelector: {}
 

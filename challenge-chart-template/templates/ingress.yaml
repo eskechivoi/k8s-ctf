@@ -35,7 +35,7 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ .serviceName }}
+                name: "{{ include "challenge.fullname" . }}-service"
                 port:
                   number: {{ .port }}
           {{- end }}

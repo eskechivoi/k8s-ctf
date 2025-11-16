@@ -38,6 +38,5 @@ ingress:
     - paths:
         - path: /
           pathType: Prefix
-          serviceName: ctfChallengeName-service
           port: 80
       host: localhost
