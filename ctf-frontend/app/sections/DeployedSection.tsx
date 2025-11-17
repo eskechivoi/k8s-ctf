@@ -7,12 +7,13 @@ interface DeployedSectionProps {
     isLoading: boolean;
     deployments: Deployment[];
     fetchData: () => Promise<void>;
+    handleCleanup: (release_name: string) => Promise<void>;
 }
 
 /**
  * Component to list all the active Helm releases.
  */
-const DeployedSection: React.FC<DeployedSectionProps> = ({ isLoading, deployments, fetchData }) => {
+const DeployedSection: React.FC<DeployedSectionProps> = ({ isLoading, deployments, fetchData, handleCleanup }) => {
     
     const activeDeployments = deployments.filter((d: Deployment) => d.status !== 'failed' && d.status !== 'error');
     const failedDeployments = deployments.filter((d: Deployment) => d.status === 'failed' || d.status === 'error');
@@ -48,7 +49,13 @@ const DeployedSection: React.FC<DeployedSectionProps> = ({ isLoading, deployment
             )}
             
             <div className="space-y-3">
-                {activeDeployments.map(d => <DeploymentItem key={d.release_name} deployment={d} fetchData={fetchData} />)}
+                {activeDeployments.map(d => (
+                    <DeploymentItem
+                        key={d.release_name}
+                        deployment={d}
+                        handleCleanup={handleCleanup}
+                    />
+                ))}
             </div>
             
             {failedDeployments.length > 0 && (
@@ -57,7 +64,13 @@ const DeployedSection: React.FC<DeployedSectionProps> = ({ isLoading, deployment
                         <AlertTriangle className="w-5 h-5 mr-2" /> Failed Deployments ({failedDeployments.length})
                     </h4>
                     <div className="space-y-3">
-                        {failedDeployments.map(d => <DeploymentItem key={d.release_name} deployment={d} fetchData={fetchData} />)}
+                        {failedDeployments.map(d => (
+                            <DeploymentItem
+                                key={d.release_name}
+                                deployment={d}
+                                handleCleanup={handleCleanup}
+                            />
+                        ))}
                     </div>
                 </div>
             )}

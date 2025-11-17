@@ -116,8 +116,8 @@ const Page: React.FC = () => {
             });
             await fetchData();
         } catch (error: any) {
-             const errorDetails = error.message ? JSON.parse(error.message) : { error: 'Unknown Error' };
-             setMessage({ 
+            const errorDetails = error.message ? JSON.parse(error.message) : { error: 'Unknown Error' };
+            setMessage({ 
                 type: 'error', 
                 text: 'Error deploying the challenge.', 
                 details: [errorDetails.error || 'Unknown deployment failure.', ...errorDetails.message || []] 
@@ -128,6 +128,34 @@ const Page: React.FC = () => {
             ));
         }
     }, [user, fetchData]);
+
+    const handleCleanup = useCallback(async (release_name: string) => {
+        const parts = release_name.split('-');
+        const user = parts[0];
+        const challengeName = parts.slice(1).join('-');
+        const payload = {
+            user_name: user,
+            challenge_name: challengeName
+        };
+
+        try {        
+            setMessage({ type: 'info', text: `Initiating cleanup for challenge ${challengeName} for user ${user}...` }); 
+            const response = await fetchApi<{ message: string, release_name: string, helm_output: string[] }, typeof payload>('/api/deployment', 'DELETE', payload);
+            setMessage({ 
+                type: 'success', 
+                text: response.message, 
+                details: [`Release: ${response.release_name}`, 'Status: Removed.'] 
+            });
+            await fetchData();
+        } catch (error: any) {
+            const errorDetails = error.message ? JSON.parse(error.message) : { error: 'Unknown Error' };
+            setMessage({ 
+                type: 'error', 
+                text: 'Error cleaning up the challenge deployment.', 
+                details: [errorDetails.error || 'Unknown deployment failure.', ...errorDetails.message || []] 
+            });
+        }
+    }, [fetchData]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
@@ -234,6 +262,7 @@ const Page: React.FC = () => {
                                 isLoading={isLoading}
                                 deployments={deployments}
                                 fetchData={fetchData}
+                                handleCleanup={handleCleanup}
                             />
                         )}
                     </div>

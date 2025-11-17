@@ -1,25 +1,11 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle, Loader2, Trash2, Clipboard } from 'lucide-react';
 import type { Deployment } from '@/lib/types';
-import { fetchApi } from '@/lib/fetchApi';
 
-const DeploymentItem: React.FC<{ deployment: Deployment, fetchData: () => Promise<void> }> = ({ deployment, fetchData }) => {
-    
-    const handleCleanup = async (releaseName: string) => {
-        try {
-            console.log(`Simulating cleanup for ${releaseName}...`); 
-            
-            await fetchApi<{ message: string }, { release_name: string }>('/api/deployment', 'DELETE', { release_name: releaseName });
-
-            alert(`Cleanup successful for ${releaseName}.`);
-            await fetchData();
-            
-        } catch (error) {
-             alert(`Error during cleanup for ${releaseName}. See console for details.`);
-             console.error('Cleanup Error:', error);
-        }
-    };
-    
+const DeploymentItem: React.FC<{ 
+    deployment: Deployment,
+    handleCleanup: (release_name: string) => Promise<void>; 
+}> = ({ deployment, handleCleanup }) => {    
     const handleCopy = (text: string) => {
         const el = document.createElement('textarea');
         el.value = text;
