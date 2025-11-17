@@ -1,13 +1,16 @@
 export interface Dependency {
     name: string;
     version: string;
-    lastUpdated: string;
+    description: string;
 }
 
-export interface Deployment {
+export type DeploymentStatus = 'deployed' | 'pending-upgrade' | 'failed' | 'error';
+
+export type Deployment = {
     release_name: string;
-    status: 'deployed' | 'pending-upgrade' | 'error';
     chart: string;
+    status: DeploymentStatus;
+    service_url?: string;
 }
 
 export type Message = {

@@ -4,9 +4,9 @@ import { Dependency, Deployment } from './types';
 
 // Mock data for available dependencies (challenges)
 export const MOCK_DEPENDENCIES: Dependency[] = [
-    { name: 'challenge-web-basic-1', version: '1.0.0', lastUpdated: '2024-05-01' },
-    { name: 'challenge-network-hard', version: '2.1.0', lastUpdated: '2024-05-15' },
-    { name: 'challenge-crypto-intro', version: '1.2.3', lastUpdated: '2024-06-10' },
+    { name: 'challenge-web-basic-1', version: '1.0.0', description: '2024-05-01' },
+    { name: 'challenge-network-hard', version: '2.1.0', description: '2024-05-15' },
+    { name: 'challenge-crypto-intro', version: '1.2.3', description: '2024-06-10' },
 ];
 
 // Mock data for active deployments
@@ -34,7 +34,7 @@ export const mockFetch = <T, U>(endpoint: string, method: 'GET' | 'POST', data?:
                         MOCK_DEPENDENCIES.push({ 
                             name: challengeName, 
                             version: '1.0.0', 
-                            lastUpdated: new Date().toISOString().split('T')[0] 
+                            description: new Date().toISOString().split('T')[0] 
                         });
                         resolve({ message: `File '${challengeName}' successfully uploaded and processed.` } as unknown as T);
                     } else {
