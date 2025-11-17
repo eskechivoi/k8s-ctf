@@ -76,10 +76,7 @@ def get_deployed_challenges_controller():
             }
             for r in releases if r.get('status') in ['deployed', 'pending-upgrade']
         ]
-        return jsonify({
-            "message": f"Successfully retrieved {len(deployed_challenges)} deployed challenges.",
-            "challenges": deployed_challenges
-        }), 200
+        return jsonify(deployed_challenges), 200
     except subprocess.CalledProcessError as e:
         app.logger.error(f"Error during Helm list: {e.stderr}")
         return jsonify({

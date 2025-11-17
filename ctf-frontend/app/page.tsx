@@ -38,8 +38,8 @@ const Page: React.FC = () => {
                 fetchApi<Dependency[], void>('/api/dependencies', 'GET'),
                 fetchApi<Deployment[], void>('/api/deployment', 'GET'),
             ]);
-            setDependencies(deps);
-            setDeployments(deploys);
+            setDependencies(deps || []);
+            setDeployments(deploys || []);
         } catch (error: any) {
             setMessage({ 
                 type: 'error', 
@@ -128,12 +128,12 @@ const Page: React.FC = () => {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
-        if (file && (file.name.endsWith('.tar') || file.name.endsWith('.tar.gz'))) {
+        if (file && (file.name.endsWith('.tar') || file.name.endsWith('.tar.gz') || file.name.endsWith('.tgz'))) {
             setSelectedFile(file);
             setMessage(null);
         } else {
             setSelectedFile(null);
-            setMessage({ type: 'error', text: 'Only files with .tar or .tar.gz extensions are valid.' });
+            setMessage({ type: 'error', text: 'Only files with .tar, .tar.gz or .tgz extensions are valid.' });
         }
     };
 

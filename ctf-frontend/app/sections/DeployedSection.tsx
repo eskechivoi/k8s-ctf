@@ -26,10 +26,10 @@ const DeployedSection: React.FC<DeployedSectionProps> = ({ isLoading, deployment
                 <button 
                     onClick={fetchData} 
                     disabled={isLoading}
-                    className="flex items-center text-sm px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+                    className={`p-2 rounded-full text-gray-500 hover:text-indigo-600 transition-colors ${isLoading ? 'animate-spin' : ''}`}
+                    title="Reload Deployments"
                 >
-                    <RefreshCw className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} /> 
-                    Refresh
+                    <RefreshCw className="w-5 h-5" />
                 </button>
             </div>
             

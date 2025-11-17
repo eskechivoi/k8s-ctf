@@ -32,7 +32,7 @@ def add_dependency_controller():
     chart_file = request.files.get('chart_file')
     
     if not chart_file:
-        return jsonify({"error": "Missing challenge_name or chart_file."}), 400
+        return jsonify({"error": "Missing chart_file."}), 400
     
     charts_storage_dir = app.config['CHARTS_STORAGE_DIR']
     parent_chart_path = app.config['PARENT_CHART_PATH']

@@ -18,7 +18,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ user, selectedFile, handl
             <Upload className="w-10 h-10 mx-auto text-indigo-400 mb-3" />
             <label htmlFor="file-upload" className="cursor-pointer">
                 <p className="font-medium text-indigo-600 hover:text-indigo-500">
-                    {selectedFile ? selectedFile.name : 'Click to select a .tar or .tar.gz file'}
+                    {selectedFile ? selectedFile.name : 'Click to select a .tar, .tar.gz or .tgz file'}
                 </p>
                 <p className="text-sm text-gray-500">Max size 10MB</p>
                 <input 
