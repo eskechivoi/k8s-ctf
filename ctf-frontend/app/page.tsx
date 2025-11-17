@@ -25,7 +25,7 @@ const Page: React.FC = () => {
     const [user, setUser] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [message, setMessage] = useState<Message>(null);
-    const [activeTab, setActiveTab] = useState<'upload' | 'deploy' | 'deployed'>('deploy'); // Start on deploy section for better demo
+    const [activeTab, setActiveTab] = useState<'upload' | 'deploy' | 'deployed'>('deploy');
 
     /**
      * Fetches the current list of available challenges and running deployments.
@@ -66,8 +66,11 @@ const Page: React.FC = () => {
         setIsUploading(true);
         setMessage({ type: 'info', text: `Uploading ${selectedFile.name}...` });
 
+        const formData = new FormData();
+        formData.append('chart_file', selectedFile);
+
         try {
-            const response = await fetchApi<{ message: string }, { challengeFile: File }>('/api/dependencies', 'POST', { challengeFile: selectedFile });
+            const response = await fetchApi<{ message: string }, FormData>('/api/dependencies', 'POST', formData as any); 
             setMessage({ type: 'success', text: response.message });
             setSelectedFile(null);
             await fetchData();

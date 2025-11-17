@@ -1,7 +1,6 @@
 export interface Dependency {
     name: string;
     version: string;
-    description: string;
 }
 
 export type DeploymentStatus = 'deployed' | 'pending-upgrade' | 'failed' | 'error';

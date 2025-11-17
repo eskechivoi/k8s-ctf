@@ -9,7 +9,7 @@ const DeploymentItem: React.FC<{ deployment: Deployment, fetchData: () => Promis
         try {
             console.log(`Simulating cleanup for ${releaseName}...`); 
             
-            await fetchApi<{ message: string }, { release_name: string }>('/api/cleanup', 'DELETE', { release_name: releaseName });
+            await fetchApi<{ message: string }, { release_name: string }>('/api/deployment', 'DELETE', { release_name: releaseName });
 
             alert(`Cleanup successful for ${releaseName}.`);
             await fetchData();

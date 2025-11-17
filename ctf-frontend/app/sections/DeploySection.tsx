@@ -47,7 +47,7 @@ const DeploySection: React.FC<DeploySectionProps> = ({ isLoading, dependencies, 
                 <div key={dep.name} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
                     <div>
                         <p className="text-lg font-semibold text-gray-900">{dep.name}</p>
-                        <p className="text-sm text-gray-600">v{dep.version} | {dep.description}</p>
+                        <p className="text-sm text-gray-600">v{dep.version}</p>
                     </div>
                     <button
                         onClick={() => handleDeploy(dep.name)}
