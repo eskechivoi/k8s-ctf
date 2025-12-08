@@ -11,7 +11,6 @@ global:
     create: true
     automount: true
     annotations: {}
-    name: "challenge-commons-serviceaccount"
 
   imagePullSecrets: []
 

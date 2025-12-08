@@ -9,9 +9,8 @@ import UploadSection from './sections/UploadSection';
 import DeploySection from './sections/DeploySection';
 import DeployedSection from './sections/DeployedSection';
 
-//import { mockFetch } from '@/lib/mockApi'; 
 import { fetchApi } from '@/lib/fetchApi';
-import type { Dependency, Deployment, Message } from '@/lib/types';
+import type { Dependency, Deployment, ErrorDetails, Message } from '@/lib/types';
 
 /**
  * Main component (Page) that manages global state of the application.
@@ -56,6 +55,21 @@ const Page: React.FC = () => {
         fetchData();
     }, [fetchData]);
 
+    const handleError = (error: any, text: string) => {
+        const isErrorDetails = error && typeof error === 'object' && 'error' in error && 'details' in error;
+        const errorDetails = isErrorDetails
+            ? (error as ErrorDetails)
+            : { 
+                error: 'Unknown Error', 
+                details: [((error as Error).message) || 'Unknown failure.']
+            };      
+        setMessage({ 
+            type: 'error', 
+            text: text,
+            details: [errorDetails.error, ...errorDetails.details]
+        });
+    }
+
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedFile || !user) {
@@ -75,11 +89,7 @@ const Page: React.FC = () => {
             setSelectedFile(null);
             await fetchData();
         } catch (error: any) {
-            setMessage({ 
-                type: 'error', 
-                text: 'Error uploading file.', 
-                details: [JSON.parse(error.message).error || 'Processing or network error.'] 
-            });
+            handleError(error, 'Error uploading file.')
         } finally {
             setIsUploading(false);
         }
@@ -116,13 +126,7 @@ const Page: React.FC = () => {
             });
             await fetchData();
         } catch (error: any) {
-            const errorDetails = error.message ? JSON.parse(error.message) : { error: 'Unknown Error' };
-            setMessage({ 
-                type: 'error', 
-                text: 'Error deploying the challenge.', 
-                details: [errorDetails.error || 'Unknown deployment failure.', ...errorDetails.message || []] 
-            });
-            
+            handleError(error, 'Error deploying the challenge.')
             setDeployments((prev: Deployment[]) => (prev || []).map(d => 
                 d.release_name === `${user}-${challengeName}` ? { ...d, status: 'error' } : d
             ));
@@ -148,12 +152,7 @@ const Page: React.FC = () => {
             });
             await fetchData();
         } catch (error: any) {
-            const errorDetails = error.message ? JSON.parse(error.message) : { error: 'Unknown Error' };
-            setMessage({ 
-                type: 'error', 
-                text: 'Error cleaning up the challenge deployment.', 
-                details: [errorDetails.error || 'Unknown deployment failure.', ...errorDetails.message || []] 
-            });
+            handleError(error, 'Error cleaning up the challenge deployment.')
         }
     }, [fetchData]);
 

@@ -17,3 +17,8 @@ export type Message = {
     text: string;
     details?: string[];
 } | null;
+
+export type ErrorDetails = {
+    error: string,
+    details: string[]
+}

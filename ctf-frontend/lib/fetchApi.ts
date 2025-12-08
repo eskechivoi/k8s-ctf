@@ -1,3 +1,5 @@
+import { ErrorDetails } from "./types";
+
 const MAX_RETRIES = 3;
 
 /**
@@ -42,7 +44,7 @@ export const fetchApi = async <T = void, U = unknown>(
             const contentType = response.headers.get('content-type');
 
             if (!response.ok) {
-                let errorDetails: { error: string, details: string[] } = { 
+                let errorDetails: ErrorDetails = { 
                     error: `HTTP Error: ${response.status} ${response.statusText}`, 
                     details: [] 
                 };

@@ -49,14 +49,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "challenge-commons.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "challenge-commons.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "challenge-commons.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
