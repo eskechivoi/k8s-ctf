@@ -1,0 +1,30 @@
+{{- if .Values.global.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.global.gateway.gatewayName | default "commons-gateway" }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  gatewayClassName: {{ .Values.global.gateway.className | default "nginx" }}
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- if .Values.global.gateway.tls }}
+    - name: https
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          {{- range .Values.global.gateway.tls }}
+          - name: {{ .secretName }}
+          {{- end }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- end }}
+{{- end }}

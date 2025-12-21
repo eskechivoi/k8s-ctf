@@ -1,0 +1,11 @@
+{{- if .Values.global.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: {{ .Values.global.gateway.className | default "nginx" }}
+  labels:
+    {{- include "challenge.labels" . | nindent 4 }}
+spec:
+  controllerName: {{ .Values.global.gateway.controllerName | default "gateway.nginx.org/nginx-gateway-controller" }}
+  description: "GatewayClass for the NGINX controller of {{ include "challenge.fullname" . }}"
+{{- end }}

@@ -73,7 +73,7 @@ const Page: React.FC = () => {
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedFile || !user) {
-            setMessage({ type: 'error', text: 'Please, introduce your username and select a .tar file.' });
+            setMessage({ type: 'error', text: 'Please, introduce the user id and select a .tar file.' });
             return;
         }
 
@@ -100,7 +100,7 @@ const Page: React.FC = () => {
      */
     const handleDeploy = useCallback(async (challengeName: string) => {
         if (!user) {
-            setMessage({ type: 'error', text: 'Username is mandatory for the deployment.' });
+            setMessage({ type: 'error', text: 'user id is mandatory for the deployment.' });
             return;
         }
         
@@ -202,7 +202,7 @@ const Page: React.FC = () => {
                     
                     <div className="mb-8">
                         <label htmlFor="user-input" className="block text-sm font-medium text-gray-700 mb-2">
-                            Your username: <span className="text-red-500">*Mandatory for deployment</span>
+                            Your user id: <span className="text-red-500">*Mandatory for deployment</span>
                         </label>
                         <input
                             id="user-input"

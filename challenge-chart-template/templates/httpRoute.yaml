@@ -1,0 +1,35 @@
+{{- if .Values.global.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: "{{ include "challenge.fullname" . }}-route"
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "challenge.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ .Values.global.gateway.gatewayName | default "commons-gateway" }}
+      namespace: {{ .Values.global.namespace }}
+  {{- if .Values.routes.hosts }}
+  hostnames:
+    {{- range .Values.routes.hosts }}
+    {{- if .host }}
+    - {{ .host | quote }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.routes.paths }}
+  rules:
+    {{- range .Values.routes.paths }}
+    {{- if .path}}
+    - matches:
+        - path:
+            type: {{ .pathType | default "Exact" }}
+            value: {{ .path }}
+      backendRefs:
+        - name: "{{ include "challenge.fullname" $ }}-service"
+          port: {{ .port | default $.Values.service.port }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

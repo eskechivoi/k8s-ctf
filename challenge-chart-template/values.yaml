@@ -29,14 +29,13 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-ingress:
-  enabled: true
+routes:
   className: "nginx"
   annotations: {}
   tls: []
   hosts:
-    - paths:
-        - path: /test
-          pathType: Prefix
-          port: 80
-      host: localhost
+    - host: localhost
+  paths:
+    - path: /test
+      pathType: PathPrefix
+      port: 80
