@@ -70,11 +70,11 @@ routes:
     - host: localhost
   paths:
     - path: /api
-      pathType: Prefix
+      pathType: PathPrefix
       serviceName: ctf-api-service
       port: 80
     - path: /
-      pathType: Prefix
+      pathType: PathPrefix
       serviceName: ctf-frontend-service
       port: 80
 
