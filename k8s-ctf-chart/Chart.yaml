@@ -6,8 +6,10 @@ version: 0.1.0
 appVersion: "0.1.0"
 dependencies:
   - name: ctf-api
+    condition: global.configuration.api.enabled
     version: 0.1.0
     repository: "file://../ctf-api/chart"
   - name: ctf-frontend
+    condition: global.configuration.frontend.enabled
     version: 0.1.0
     repository: "file://../ctf-frontend/chart"
