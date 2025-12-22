@@ -61,3 +61,13 @@ global:
     className: "nginx"
     controllerName: "gateway.nginx.org/nginx-gateway-controller"
     namespace: "nginx-gateway"
+
+  networkPolicies:
+    protectApi:
+      name: "api-allow-only-frontend"
+      apiLabels:
+        app.kubernetes.io/name: ctf-api
+      frontendLabels:
+        app.kubernetes.io/name: ctf-frontend
+      allowedCidr:
+        - 127.0.0.1/32

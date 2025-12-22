@@ -45,3 +45,11 @@ routes:
       pathType: PathPrefix
       serviceName: "ctf-api-service"
       port: 80
+    - path: /apidocs
+      pathType: PathPrefix
+      serviceName: "ctf-api-service"
+      port: 80
+    - path: /flasgger_static
+      pathType: PathPrefix
+      serviceName: "ctf-api-service"
+      port: 80

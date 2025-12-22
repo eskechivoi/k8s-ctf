@@ -3,6 +3,7 @@ import subprocess
 from flask import current_app as app, jsonify, request
 from werkzeug.utils import secure_filename
 from ..utils.helmUtils import install, uninstall, list_releases
+from ..utils.k8sUtils import K8sChallengeDiscovery
 
 def _get_release_name(challenge_name, user_name):
     safe_challenge_name = secure_filename(challenge_name).lower()
@@ -11,7 +12,44 @@ def _get_release_name(challenge_name, user_name):
 def deploy_challenge_controller():
     """
     helm install of parent chart, enabling desired subchart.
-    (POST /api/deployment)
+    ---
+    tags:
+      - Deployments
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - user_name
+            - challenge_name
+          properties:
+            user_name:
+              type: string
+              example: "john_doe"
+            challenge_name:
+              type: string
+              example: "ctfChallengeName"
+    responses:
+      200:
+        description: Deployment successful.
+        schema:
+          properties:
+            message: {type: string, example: "Deployment of 'ctfChallengeName' successful for user 'john_doe'."}
+            release_name: {type: string, example: "john_doe-ctfChallengeName"}
+      400:
+        description: Missing required fields.
+        schema:
+          properties:
+            error: {type: string, example: "Missing user_name or challenge_name."}
+      500:
+        description: Helm execution error.
+        schema:
+          properties:
+            error: {type: string, example: "Helm deployment failed."}
+            helm_error: {type: array, items: {type: string}}
+            command: {type: string}
     """
     data = request.get_json()
     user_name = data.get('user_name')
@@ -43,7 +81,6 @@ def deploy_challenge_controller():
         return jsonify({
             "message": f"Deployment of '{challenge_name}' successful for user '{user_name}'.",
             "release_name": release_name,
-            "helm_output": result.stdout.split('\n')
         }), 200
 
     except subprocess.CalledProcessError as e:
@@ -63,8 +100,36 @@ def deploy_challenge_controller():
 def get_deployed_challenges_controller():
     """
     Retrieves the list of currently installed Helm releases (deployed challenges).
-    (GET /api/deployment)
+    ---
+    tags:
+      - Deployments
+    parameters:
+      - in: body
+        name: body
+        required: false
+        schema:
+          properties:
+            user_name:
+              type: string
+              description: Optional filter to see only a specific user's challenges.
+              example: "john_doe"
+    responses:
+      200:
+        description: A list of deployed challenges.
+        schema:
+          type: array
+          items:
+            properties:
+              release_name: {type: string}
+              chart: {type: string}
+              revision: {type: string}
+              status: {type: string}
+              namespace: {type: string}
+      500:
+        description: Error communicating with Helm or parsing output.
     """
+    data = request.get_json()
+    user_name = data.get('user_name')
     try:
         result = list_releases(app.config['CHALLENGES_NAMESPACE'])
         app.logger.info(f"Executed: {' '.join(result.args)}")
@@ -81,7 +146,9 @@ def get_deployed_challenges_controller():
                 "status": r.get('status'),
                 "namespace": r.get('namespace'),
             }
-            for r in releases if r.get('status') in ['deployed', 'pending-upgrade']
+            for r in releases
+            if r.get('status') in ['deployed', 'pending-upgrade']
+            and (not user_name or user_name in r.get('name', ''))
         ]
         return jsonify(deployed_challenges), 200
     except subprocess.CalledProcessError as e:
@@ -104,7 +171,33 @@ def get_deployed_challenges_controller():
 def uninstall_challenge_controller():
     """
     Uninstalls the helm release for a user and a challenge.
-    (DELETE /api/deployment)
+    ---
+    tags:
+      - Deployments
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - user_name
+            - challenge_name
+          properties:
+            user_name: {type: string, example: "john_doe"}
+            challenge_name: {type: string, example: "ctfChallengeName"}
+    responses:
+      200:
+        description: Challenge uninstalled successfully.
+        schema:
+          properties:
+            message: {type: string}
+            release_name: {type: string}
+            helm_output: {type: array, items: {type: string}}
+      400:
+        description: Invalid request data.
+      500:
+        description: Helm uninstall command failed.
     """
     data = request.get_json()
     user_name = data.get('user_name')
@@ -140,3 +233,45 @@ def uninstall_challenge_controller():
     except FileNotFoundError:
         app.logger.error("'helm' command was not found. Make sure helm is installed in the system.")
         return jsonify({"error": "'helm' binary was not found."}), 500
+    
+def get_endpoint_for_challenge():
+    """
+    Returns the URL to access the challenge.
+    ---
+    tags:
+      - Deployments
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - user_name
+            - challenge_name
+          properties:
+            user_name: {type: string, example: "john_doe"}
+            challenge_name: {type: string, example: "sql-injection-1"}
+    responses:
+      200:
+        description: Challenge uninstalled successfully.
+        schema:
+          properties:
+            path: {type: string}
+      400:
+        description: Invalid request data.
+      500:
+        description: Helm uninstall command failed.
+    """
+    data = request.get_json()
+    user_name = data.get('user_name')
+    challenge_name = data.get('challenge_name')
+    challenges_namespace = app.config['CHALLENGES_NAMESPACE']
+    challenge_fullname = f"{user_name}-{challenge_name}"
+
+    if not user_name or not challenge_name:
+        return jsonify({"error": "Missing user_name or challenge_name."}), 400
+    
+    discovery = K8sChallengeDiscovery(namespace=challenges_namespace)
+    data = discovery.get_endpoints(challenge_fullname)
+    return data.path

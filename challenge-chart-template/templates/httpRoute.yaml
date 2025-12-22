@@ -24,7 +24,7 @@ spec:
     - matches:
         - path:
             type: {{ .pathType | default "Exact" }}
-            value: {{ .path }}
+            value: "/{{ randNumeric 16 }}"
       backendRefs:
         - name: "{{ include "challenge.fullname" $ }}-service"
           port: {{ .port | default $.Values.service.port }}

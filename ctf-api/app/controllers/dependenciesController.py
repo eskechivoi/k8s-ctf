@@ -9,7 +9,34 @@ from ..utils.helmUtils import update_dependencies
 def get_dependencies_controller():
     """
     Reads the Chart.yaml and returns the configured dependencies.
-    (GET /api/dependencies)
+    ---
+    tags:
+      - Helm Dependencies
+    responses:
+      200:
+        description: Lists the found dependencies.
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              alias:
+                type: string
+                example: "ctfChallengeName"
+              condition:
+                type: string
+                example: "ctfChallengeName.enabled"
+              name:
+                type: string
+                example: "ctfChallengeName"
+              version:
+                type: string
+                example: "0.1.0"
+              repository:
+                type: string
+                example: "file://./charts/ctfChallengeName"
+      500:
+        description: Internal error while reading Chart.yaml.
     """
     chart_yaml_path = app.config['CHART_YAML_PATH']
     chart_data = read_chart_yaml(chart_yaml_path)
@@ -26,7 +53,36 @@ def add_dependency_controller():
     """
     Receives a compressed chart, saves it locally, reads its metadata, and 
     adds the dependency to the parent chart's Chart.yaml
-    (POST /api/dependencies)
+    ---
+    tags:
+      - Helm Dependencies
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: chart_file
+        in: formData
+        type: file
+        required: true
+        description: compressed Helm Chart file (.tgz or .tar.gz).
+    responses:
+      201:
+        description: Chart procesado y añadido correctamente.
+        schema:
+          properties:
+            message:
+              type: string
+              example: "Chart 'ctfChallengeName' (v0.1.0) saved and dependency successfully added."
+            dependency_config:
+              type: object
+              properties:
+                name: {type: string, example: "ctfChallengeName"}
+                version: {type: string, example: "0.1.0"}
+                alias: {type: string, example: "ctfChallengeName"}
+                condition: {type: string, example: "ctfChallengeName.enabled"}
+      400:
+        description: El archivo no es válido o faltan metadatos (name/version).
+      500:
+        description: Error al actualizar Chart.yaml o ejecutar helm dependency update.
     """
     chart_file = request.files.get('chart_file')
     
