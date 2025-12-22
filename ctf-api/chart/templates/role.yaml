@@ -5,5 +5,5 @@ metadata:
   namespace: {{ .Values.global.challengesNamespace }}
 rules:
 - apiGroups: ["*"]
-  resources: ["deployments", "services", "secrets", "configmaps", "ingresses", "persistentvolumeclaims", "serviceaccounts"]
+  resources: ["deployments", "services", "secrets", "configmaps", "persistentvolumeclaims", "serviceaccounts", "httproutes"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

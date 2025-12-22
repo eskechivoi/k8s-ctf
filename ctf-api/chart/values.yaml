@@ -33,3 +33,15 @@ readinessProbe:
   httpGet:
     path: /
     port: http
+
+routes:
+  className: "nginx"
+  annotations: {}
+  tls: []
+  hosts:
+    - host: localhost
+  paths:
+    - path: /api
+      pathType: PathPrefix
+      serviceName: "ctf-api-service"
+      port: 80

@@ -17,3 +17,15 @@ readinessProbe:
   httpGet:
     path: /
     port: http
+
+routes:
+  className: "nginx"
+  annotations: {}
+  tls: []
+  hosts:
+    - host: localhost
+  paths:
+    - path: /
+      pathType: PathPrefix
+      serviceName: "ctf-frontend-service"
+      port: 80

@@ -6,6 +6,11 @@ image:
 selectorLabels:
   component: 'challengeName'
 
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+
 service:
   type: ClusterIP
   port: 80

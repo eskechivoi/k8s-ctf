@@ -61,20 +61,3 @@ global:
     className: "nginx"
     controllerName: "gateway.nginx.org/nginx-gateway-controller"
     namespace: "nginx-gateway"
-
-routes:
-  className: "nginx"
-  annotations: {}
-  tls: []
-  hosts:
-    - host: localhost
-  paths:
-    - path: /api
-      pathType: PathPrefix
-      serviceName: ctf-api-service
-      port: 80
-    - path: /
-      pathType: PathPrefix
-      serviceName: ctf-frontend-service
-      port: 80
-

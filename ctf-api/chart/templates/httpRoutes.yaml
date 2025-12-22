@@ -1,10 +1,10 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: "{{ include "k8s-parent-chart.fullname" . }}-route"
+  name: "{{ .Chart.Name }}-route"
   namespace: {{ .Values.global.namespace }}
   labels:
-    {{- include "k8s-parent-chart.labels" . | nindent 4 }}
+    {{- include "cft-api.selectorLabels" . | nindent 4 }}
 spec:
   parentRefs:
     - name: {{ .Values.global.gateway.gatewayName | default "commons-gateway" }}
@@ -26,8 +26,10 @@ spec:
             type: {{ .pathType | default "Exact" }}
             value: {{ .path }}
       backendRefs:
-        - name: "{{ include "k8s-parent-chart.fullname" $ }}-service"
+        - name: {{ .serviceName | default "{{ $.Chart.Name }}-service" }}
           port: {{ .port }}
+          kind: Service
+          namespace: {{ $.Values.global.namespace }}
     {{- end }}
     {{- end }}
   {{- end }}
