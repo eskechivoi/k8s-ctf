@@ -3,6 +3,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
   name: {{ .Values.global.gateway.className | default "nginx" }}
+  namespace: {{ .Values.global.gateway.namespace | default .Values.global.namespace }}
   labels:
     {{- include "challenge.labels" . | nindent 4 }}
 spec:

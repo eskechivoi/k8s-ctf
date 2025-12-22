@@ -9,7 +9,7 @@ metadata:
 spec:
   parentRefs:
     - name: {{ .Values.global.gateway.gatewayName | default "commons-gateway" }}
-      namespace: {{ .Values.global.namespace }}
+      namespace: {{ .Values.global.gateway.namespace | default .Values.global.namespace }}
   {{- if .Values.routes.hosts }}
   hostnames:
     {{- range .Values.routes.hosts }}
