@@ -1,7 +1,12 @@
-from kubernetes import client
+from kubernetes import client, config
 
 class K8sChallengeDiscovery:
-    def __init__(self, namespace="default"):        
+    def __init__(self, namespace="default"): 
+        try:
+            config.load_incluster_config()
+        except config.ConfigException:
+            config.load_kube_config()
+
         self.custom_api = client.CustomObjectsApi()
         self.v1 = client.CoreV1Api()
         self.namespace = namespace
@@ -15,7 +20,7 @@ class K8sChallengeDiscovery:
         """
         Reads the HTTPRoute resource and maps every path with the port of its servicio.
         """
-        route_name = f"{challenge_fullname}-route"
+        route_name = f"{challenge_fullname.lower()}-route"
         results = []
 
         try:

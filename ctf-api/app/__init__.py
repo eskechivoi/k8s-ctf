@@ -25,6 +25,11 @@ def create_app(challenges_namespace, parent_chart_path, charts_storage_dir, gate
                 "model_filter": lambda tag: True,
             }
         ],
+        "info": {
+            "title": "Helm CTF API",
+            "description": "API to manage CTF challenges using Helm",
+            "version": "0.1.0"
+        },
         "static_url_path": "/flasgger_static",
         "swagger_ui": True,
         "specs_route": "/apidocs/"

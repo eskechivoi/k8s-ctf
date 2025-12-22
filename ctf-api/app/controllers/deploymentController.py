@@ -27,7 +27,7 @@ def deploy_challenge_controller():
           properties:
             user_name:
               type: string
-              example: "john_doe"
+              example: "johndoe"
             challenge_name:
               type: string
               example: "ctfChallengeName"
@@ -36,8 +36,8 @@ def deploy_challenge_controller():
         description: Deployment successful.
         schema:
           properties:
-            message: {type: string, example: "Deployment of 'ctfChallengeName' successful for user 'john_doe'."}
-            release_name: {type: string, example: "john_doe-ctfChallengeName"}
+            message: {type: string, example: "Deployment of 'ctfChallengeName' successful for user 'johndoe'."}
+            release_name: {type: string, example: "johndoe-ctfChallengeName"}
       400:
         description: Missing required fields.
         schema:
@@ -104,21 +104,19 @@ def get_deployed_challenges_controller():
     tags:
       - Deployments
     parameters:
-      - in: body
-        name: body
+      - name: user_name
+        in: query
+        type: string
         required: false
-        schema:
-          properties:
-            user_name:
-              type: string
-              description: Optional filter to see only a specific user's challenges.
-              example: "john_doe"
+        description: Optional filter to see only a specific user's challenges.
+        example: "johndoe"
     responses:
       200:
         description: A list of deployed challenges.
         schema:
           type: array
           items:
+            type: object
             properties:
               release_name: {type: string}
               chart: {type: string}
@@ -128,8 +126,7 @@ def get_deployed_challenges_controller():
       500:
         description: Error communicating with Helm or parsing output.
     """
-    data = request.get_json()
-    user_name = data.get('user_name')
+    user_name = request.args.get('user_name')
     try:
         result = list_releases(app.config['CHALLENGES_NAMESPACE'])
         app.logger.info(f"Executed: {' '.join(result.args)}")
@@ -184,7 +181,7 @@ def uninstall_challenge_controller():
             - user_name
             - challenge_name
           properties:
-            user_name: {type: string, example: "john_doe"}
+            user_name: {type: string, example: "johndoe"}
             challenge_name: {type: string, example: "ctfChallengeName"}
     responses:
       200:
@@ -241,31 +238,36 @@ def get_endpoint_for_challenge():
     tags:
       - Deployments
     parameters:
-      - in: body
-        name: body
+      - name: user_name
+        in: query
+        type: string
         required: true
-        schema:
-          type: object
-          required:
-            - user_name
-            - challenge_name
-          properties:
-            user_name: {type: string, example: "john_doe"}
-            challenge_name: {type: string, example: "sql-injection-1"}
+        description: Name of the user.
+        example: "johndoe"
+      - name: challenge_name
+        in: query
+        type: string
+        required: true
+        description: Name of the challenge.
+        example: "ctfChallengeName"
     responses:
       200:
-        description: Challenge uninstalled successfully.
+        description: URL path to the challenge.
         schema:
-          properties:
-            path: {type: string}
+          type: array
+          items:
+            type: object
+            properties:
+              "path": {type: string}
+              "node_port": {type: string}
+              "service": {type: string}
       400:
         description: Invalid request data.
       500:
         description: Helm uninstall command failed.
     """
-    data = request.get_json()
-    user_name = data.get('user_name')
-    challenge_name = data.get('challenge_name')
+    user_name = request.args.get('user_name')
+    challenge_name = request.args.get('challenge_name')
     challenges_namespace = app.config['CHALLENGES_NAMESPACE']
     challenge_fullname = f"{user_name}-{challenge_name}"
 
@@ -274,4 +276,6 @@ def get_endpoint_for_challenge():
     
     discovery = K8sChallengeDiscovery(namespace=challenges_namespace)
     data = discovery.get_endpoints(challenge_fullname)
-    return data.path
+    if data is None:
+        return jsonify({"error": "Challenge route not found"}), 404
+    return jsonify(data), 200

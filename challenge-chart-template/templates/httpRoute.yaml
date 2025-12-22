@@ -20,14 +20,18 @@ spec:
   {{- if .Values.routes.paths }}
   rules:
     {{- range .Values.routes.paths }}
-    {{- if .path}}
     - matches:
         - path:
             type: {{ .pathType | default "Exact" }}
             value: "/{{ randNumeric 16 }}"
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: "/"
       backendRefs:
         - name: "{{ include "challenge.fullname" $ }}-service"
           port: {{ .port | default $.Values.service.port }}
-    {{- end }}
     {{- end }}
   {{- end }}

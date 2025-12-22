@@ -41,6 +41,5 @@ routes:
   hosts:
     - host: localhost
   paths:
-    - path: /test
-      pathType: PathPrefix
+    - pathType: PathPrefix
       port: 80
