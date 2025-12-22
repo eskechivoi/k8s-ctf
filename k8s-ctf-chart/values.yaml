@@ -56,20 +56,25 @@ global:
       volumes: []
       volumeMounts: []
 
-ingress:
-  enabled: true
+  gateway:
+    gatewayName: "commons-gateway"
+    className: "nginx"
+    controllerName: "gateway.nginx.org/nginx-gateway-controller"
+    namespace: "nginx-gateway"
+
+routes:
   className: "nginx"
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  tls: []
   hosts:
-    - paths:
-        - path: /api
-          pathType: Prefix
-          serviceName: ctf-api-service
-          port: 80
-        - path: /
-          pathType: Prefix
-          serviceName: ctf-frontend-service
-          port: 80
-      host: localhost
+    - host: localhost
+  paths:
+    - path: /api
+      pathType: Prefix
+      serviceName: ctf-api-service
+      port: 80
+    - path: /
+      pathType: Prefix
+      serviceName: ctf-frontend-service
+      port: 80
+

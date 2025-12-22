@@ -2,7 +2,6 @@ import os
 import subprocess
 import tarfile
 from flask import current_app as app, jsonify, request
-from werkzeug.utils import secure_filename
 from ..utils.yamlUtils import read_chart_yaml, add_dependency
 from ..utils.tarUtils import save_chart
 from ..utils.helmUtils import update_dependencies

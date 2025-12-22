@@ -9,7 +9,13 @@ def update_dependencies(parent_chart_path):
         cwd=parent_chart_path
     )
 
-def install(release_name, parent_chart_path, set_value, challenges_namespace):
+def install(
+    release_name,
+    parent_chart_path,
+    set_value,
+    challenges_namespace,
+    gateway_namespace
+):
     helm_command = [
         'helm', 'install',
         release_name,
@@ -17,6 +23,10 @@ def install(release_name, parent_chart_path, set_value, challenges_namespace):
         '--set', set_value,
         '--namespace', challenges_namespace
     ]
+    if gateway_namespace is not None:
+        helm_command.extend(
+            ['--set', f'global.gateway.namespace={gateway_namespace}']
+        )
     return subprocess.run(
         helm_command,
         capture_output=True,

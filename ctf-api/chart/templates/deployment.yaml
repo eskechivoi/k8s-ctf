@@ -53,6 +53,8 @@ spec:
               value: {{ .Values.challengeChartPath }}
             - name: "CHALLENGES_NAMESPACE"
               value: {{ .Values.global.challengesNamespace }}
+            - name: "GATEWAY_API_NAMESPACE"
+              value: {{ .Values.global.gateway.namespace }}
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.targetPort }}

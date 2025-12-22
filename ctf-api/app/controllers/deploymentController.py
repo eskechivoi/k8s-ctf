@@ -24,12 +24,19 @@ def deploy_challenge_controller():
     release_name = _get_release_name(challenge_name, user_name)
     parent_chart_path = app.config['PARENT_CHART_PATH']
     challenges_namespace = app.config['CHALLENGES_NAMESPACE']
+    gateway_namespace = app.config['GATEWAY_API_NAMESPACE']
     
     # Enables subchart
     set_value = f'{safe_challenge_name}.enabled=true'
     
     try:
-        result = install(release_name, parent_chart_path, set_value, challenges_namespace)
+        result = install(
+            release_name,
+            parent_chart_path,
+            set_value,
+            challenges_namespace,
+            gateway_namespace
+        )
         app.logger.info(f"Executed: {' '.join(result.args)}")
         
         # If successful, returns helm install output

@@ -21,10 +21,8 @@ global:
   affinity: {}
 
   gateway:
-    enabled: true
     gatewayName: "commons-gateway"
-    className: "nginx"
-    controllerName: "gateway.nginx.org/nginx-gateway-controller"
+    namespace: "nginx-gateway"
   
   configuration:
     challenge:

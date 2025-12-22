@@ -9,8 +9,14 @@ app_logger = logging.getLogger('ctf-api')
 CHALLENGES_NAMESPACE = os.environ.get('CHALLENGES_NAMESPACE', '/app/challenge-commons')
 PARENT_CHART_PATH = os.environ.get('PARENT_CHART_PATH', '/app/challenge-commons')
 CHARTS_STORAGE_DIR = os.path.join(PARENT_CHART_PATH, 'charts')
+GATEWAY_API_NAMESPACE = os.environ.get('GATEWAY_API_NAMESPACE')
 
-app = create_app(CHALLENGES_NAMESPACE, PARENT_CHART_PATH, CHARTS_STORAGE_DIR)
+app = create_app(
+    CHALLENGES_NAMESPACE,
+    PARENT_CHART_PATH,
+    CHARTS_STORAGE_DIR,
+    GATEWAY_API_NAMESPACE
+)
 
 try:
     Path(PARENT_CHART_PATH).mkdir(exist_ok=True)
