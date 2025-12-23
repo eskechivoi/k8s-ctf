@@ -5,13 +5,13 @@ from werkzeug.utils import secure_filename
 from ..utils.helmUtils import install, uninstall, list_releases
 from ..utils.k8sUtils import K8sChallengeDiscovery
 
-def _get_release_name(challenge_name, user_name):
+def _get_release_name(challenge_name, user_id):
     safe_challenge_name = secure_filename(challenge_name).lower()
-    return f"{secure_filename(user_name).lower()}-{safe_challenge_name}" 
+    return f"{secure_filename(user_id).lower()}-{safe_challenge_name}" 
 
 def deploy_challenge_controller():
     """
-    helm install of parent chart, enabling desired subchart.
+    Performs a helm install of the parent chart, including enabled subcharts.
     ---
     tags:
       - Deployments
@@ -22,10 +22,10 @@ def deploy_challenge_controller():
         schema:
           type: object
           required:
-            - user_name
+            - user_id
             - challenge_name
           properties:
-            user_name:
+            user_id:
               type: string
               example: "johndoe"
             challenge_name:
@@ -42,24 +42,35 @@ def deploy_challenge_controller():
         description: Missing required fields.
         schema:
           properties:
-            error: {type: string, example: "Missing user_name or challenge_name."}
-      500:
-        description: Helm execution error.
+            error: {type: string, example: "Missing user_id or challenge_name."}
+      408:
+        description: Helm command timed out.
         schema:
           properties:
-            error: {type: string, example: "Helm deployment failed."}
-            helm_error: {type: array, items: {type: string}}
-            command: {type: string}
+            error: {type: string"}
+      500:
+        description: |
+          Internal server error. Possible scenarios:
+          - Helm deployment failed.
+          - Helm binary not found in system (FileNotFoundError)
+        schema:
+          type: object
+          required:
+            - error
+          properties:
+            error: {type: string}
+            release_name: {type: string}
+            helm_output: {type: string}
     """
     data = request.get_json()
-    user_name = data.get('user_name')
+    user_id = data.get('user_id')
     challenge_name = data.get('challenge_name')
 
-    if not user_name or not challenge_name:
-        return jsonify({"error": "Missing user_name or challenge_name."}), 400
+    if not user_id or not challenge_name:
+        return jsonify({"error": "Missing user_id or challenge_name."}), 400
 
     safe_challenge_name = secure_filename(challenge_name).lower()
-    release_name = _get_release_name(challenge_name, user_name)
+    release_name = _get_release_name(challenge_name, user_id)
     parent_chart_path = app.config['PARENT_CHART_PATH']
     challenges_namespace = app.config['CHALLENGES_NAMESPACE']
     gateway_namespace = app.config['GATEWAY_API_NAMESPACE']
@@ -79,7 +90,7 @@ def deploy_challenge_controller():
         
         # If successful, returns helm install output
         return jsonify({
-            "message": f"Deployment of '{challenge_name}' successful for user '{user_name}'.",
+            "message": f"Deployment of '{challenge_name}' successful for user '{user_id}'.",
             "release_name": release_name,
         }), 200
 
@@ -92,7 +103,7 @@ def deploy_challenge_controller():
         }), 500
     except subprocess.TimeoutExpired:
         app.logger.error("Helm command timed out.")
-        return jsonify({"error": "Helm command timed out."}), 500
+        return jsonify({"error": "Helm command timed out."}), 408
     except FileNotFoundError:
         app.logger.error("'helm' command was not found. Make sure helm is installed in the system.")
         return jsonify({"error": "'helm' binary was not found."}), 500
@@ -104,7 +115,7 @@ def get_deployed_challenges_controller():
     tags:
       - Deployments
     parameters:
-      - name: user_name
+      - name: user_id
         in: query
         type: string
         required: false
@@ -123,10 +134,26 @@ def get_deployed_challenges_controller():
               revision: {type: string}
               status: {type: string}
               namespace: {type: string}
+      408:
+        description: Helm command timed out.
+        schema:
+          properties:
+            error: {type: string"}
       500:
-        description: Error communicating with Helm or parsing output.
+        description: |
+          Internal server error. Possible scenarios:
+          - Failed to parse Helm output. Raw output was not valid JSON.
+          - Helm binary not found in system (FileNotFoundError)
+        schema:
+          type: object
+          required:
+            - error
+          properties:
+            error: {type: string}
+            release_name: {type: string}
+            helm_output: {type: string}
     """
-    user_name = request.args.get('user_name')
+    user_id = request.args.get('user_id')
     try:
         result = list_releases(app.config['CHALLENGES_NAMESPACE'])
         app.logger.info(f"Executed: {' '.join(result.args)}")
@@ -145,7 +172,7 @@ def get_deployed_challenges_controller():
             }
             for r in releases
             if r.get('status') in ['deployed', 'pending-upgrade']
-            and (not user_name or user_name in r.get('name', ''))
+            and (not user_id or user_id in r.get('name', ''))
         ]
         return jsonify(deployed_challenges), 200
     except subprocess.CalledProcessError as e:
@@ -157,7 +184,7 @@ def get_deployed_challenges_controller():
         }), 500
     except subprocess.TimeoutExpired:
         app.logger.error("Helm list command timed out.")
-        return jsonify({"error": "Helm list command timed out."}), 500
+        return jsonify({"error": "Helm list command timed out."}), 408
     except FileNotFoundError:
         app.logger.error("'helm' command was not found. Make sure helm is installed in the system.")
         return jsonify({"error": "'helm' binary was not found."}), 500
@@ -178,10 +205,10 @@ def uninstall_challenge_controller():
         schema:
           type: object
           required:
-            - user_name
+            - user_id
             - challenge_name
           properties:
-            user_name: {type: string, example: "johndoe"}
+            user_id: {type: string, example: "johndoe"}
             challenge_name: {type: string, example: "ctfChallengeName"}
     responses:
       200:
@@ -192,18 +219,39 @@ def uninstall_challenge_controller():
             release_name: {type: string}
             helm_output: {type: array, items: {type: string}}
       400:
-        description: Invalid request data.
+        description: Missing user_id or challenge_name.
+        schema:
+          type: object
+          properties:
+            error: {type: string}
+      408:
+        description: Helm command timed out.
+        schema:
+          type: object
+          properties:
+            error: {type: string}
       500:
-        description: Helm uninstall command failed.
+        description: |
+          Internal server error. Possible scenarios:
+          - Helm uninstall command failed.
+          - Helm binary not found in system (FileNotFoundError)
+        schema:
+          type: object
+          required:
+            - error
+          properties:
+            error: {type: string}
+            release_name: {type: string}
+            helm_output: {type: string}
     """
     data = request.get_json()
-    user_name = data.get('user_name')
+    user_id = data.get('user_id')
     challenge_name = data.get('challenge_name')
 
-    if not user_name or not challenge_name:
-        return jsonify({"error": "Missing user_name or challenge_name."}), 400
+    if not user_id or not challenge_name:
+        return jsonify({"error": "Missing user_id or challenge_name."}), 400
 
-    release_name = _get_release_name(challenge_name, user_name)
+    release_name = _get_release_name(challenge_name, user_id)
     challenges_namespace = app.config['CHALLENGES_NAMESPACE']
 
     try:
@@ -212,7 +260,7 @@ def uninstall_challenge_controller():
         
         # If successful, returns helm install output
         return jsonify({
-            "message": f"Successfully uninstalled challenge '{challenge_name}' for user '{user_name}'.",
+            "message": f"Successfully uninstalled challenge '{challenge_name}' for user '{user_id}'.",
             "release_name": release_name,
             "helm_output": result.stdout.split('\n')
         }), 200
@@ -226,7 +274,7 @@ def uninstall_challenge_controller():
         }), 500
     except subprocess.TimeoutExpired:
         app.logger.error("Helm command timed out.")
-        return jsonify({"error": "Helm command timed out."}), 500
+        return jsonify({"error": "Helm command timed out."}), 408
     except FileNotFoundError:
         app.logger.error("'helm' command was not found. Make sure helm is installed in the system.")
         return jsonify({"error": "'helm' binary was not found."}), 500
@@ -238,7 +286,7 @@ def get_endpoint_for_challenge():
     tags:
       - Deployments
     parameters:
-      - name: user_name
+      - name: user_id
         in: query
         type: string
         required: true
@@ -262,17 +310,25 @@ def get_endpoint_for_challenge():
               "node_port": {type: string}
               "service": {type: string}
       400:
-        description: Invalid request data.
-      500:
-        description: Helm uninstall command failed.
+        description: Missing user_id or challenge_name
+        schema:
+          type: object
+          properties:
+            error: {type: string}
+      404:
+        description: HTTPRoute object not found for the challenge.
+        schema:
+          type: object
+          properties:
+            error: {type: string}
     """
-    user_name = request.args.get('user_name')
+    user_id = request.args.get('user_id')
     challenge_name = request.args.get('challenge_name')
     challenges_namespace = app.config['CHALLENGES_NAMESPACE']
-    challenge_fullname = f"{user_name}-{challenge_name}"
+    challenge_fullname = f"{user_id}-{challenge_name}"
 
-    if not user_name or not challenge_name:
-        return jsonify({"error": "Missing user_name or challenge_name."}), 400
+    if not user_id or not challenge_name:
+        return jsonify({"error": "Missing user_id or challenge_name."}), 400
     
     discovery = K8sChallengeDiscovery(namespace=challenges_namespace)
     data = discovery.get_endpoints(challenge_fullname)

@@ -51,8 +51,7 @@ def get_dependencies_controller():
 
 def add_dependency_controller():
     """
-    Receives a compressed chart, saves it locally, reads its metadata, and 
-    adds the dependency to the parent chart's Chart.yaml
+    Receives a compressed chart, saves it locally, reads its metadata, and adds the dependency to the parent chart's Chart.yaml
     ---
     tags:
       - Helm Dependencies
@@ -63,10 +62,10 @@ def add_dependency_controller():
         in: formData
         type: file
         required: true
-        description: compressed Helm Chart file (.tgz or .tar.gz).
+        description: Compressed Helm Chart file (.tgz or .tar.gz).
     responses:
       201:
-        description: Chart procesado y añadido correctamente.
+        description: Chart correctly processed and added.
         schema:
           properties:
             message:
@@ -80,9 +79,18 @@ def add_dependency_controller():
                 alias: {type: string, example: "ctfChallengeName"}
                 condition: {type: string, example: "ctfChallengeName.enabled"}
       400:
-        description: El archivo no es válido o faltan metadatos (name/version).
+        description: Bad Request. Uploaded file is not a valid Helm tar.gz file or there's an error with the file.
+        schema:
+          properties:
+            error: {type: string }
       500:
-        description: Error al actualizar Chart.yaml o ejecutar helm dependency update.
+        description: |
+          Internal server error. Possible scenarios:
+          - Internal error trying to save/extract the chart.
+          - Helm error while helm dependency update.
+        schema:
+          properties:
+            error: {type: string }
     """
     chart_file = request.files.get('chart_file')
     
@@ -139,7 +147,7 @@ def add_dependency_controller():
     except subprocess.CalledProcessError as e:
         app.logger.error(f"Error in helm dependency update: {e.stderr}")
         return jsonify({
-            "message": "Chart saved but failed while running helm dependency update.",
+            "error": "Chart saved but failed while running helm dependency update.",
             "helm_error": e.stderr
         }), 500
         
