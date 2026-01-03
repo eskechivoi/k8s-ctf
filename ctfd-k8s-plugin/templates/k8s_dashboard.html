@@ -14,10 +14,10 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissable" role="alert">
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                             {{ message }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">×</span>
+                            <button type="button" class="close" onclick="this.closest('.alert').remove();" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                     {% endfor %}
@@ -56,8 +56,10 @@
                                 <p class="card-text text-muted small">ID: {{ chal.name }}</p>
                                 <p class="card-text">Version: <span class="badge badge-secondary">{{ chal.version }}</span></p>
                                 <div class="mt-auto">
-                                    <form action="{{ url_for('k8s_challenges.deploy_challenge') }}" method="POST">
-                                        <input type="hidden" name="challenge_name" value="{{ chal.name }}">
+                                    <form action="{{ url_for('k8s_challenges.deploy_challenge') }}" method="POST" 
+                                        onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerText='Deploying...';">
+                                        <input type="hidden" name="nonce" value="{{ Session.nonce }}">
+                                        <input type="hidden" name="challenge_name" value="{{ chal.name }}">               
                                         <button type="submit" class="btn btn-primary btn-block">
                                             <i class="fas fa-rocket"></i> Deploy Instance
                                         </button>
@@ -142,9 +144,10 @@
                                     {% endif %}
                                 </td>
                                 <td class="align-middle text-center">
-                                    <form action="{{ url_for('k8s_challenges.deploy_challenge') }}" method="POST"
-                                          onsubmit="return confirm('WARNING: This will permanently destroy your instance. Continue?');">
-                                        <input type="hidden" name="challenge_name" value="{{ dep.release_name }}">
+                                    <form action="{{ url_for('k8s_challenges.terminate_challenge') }}" method="POST"
+                                        onsubmit="return confirm('WARNING: This will permanently destroy your instance. Continue?');">
+                                        <input type="hidden" name="nonce" value="{{ Session.nonce }}">
+                                        <input type="hidden" name="challenge_name" value="{{ dep.challenge_name }}">
                                         <button type="submit" class="btn btn-danger btn-sm">
                                             <i class="fas fa-trash-alt"></i> Destroy
                                         </button>
