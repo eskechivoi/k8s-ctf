@@ -26,14 +26,16 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs" id="k8sTabs" role="tablist">
+    <ul class="nav nav-tabs" id="k8sTabs">
         <li class="nav-item">
-            <a class="nav-link active" id="available-tab" data-toggle="tab" href="#available" role="tab">
+            <a class="nav-link {% if active_tab == 'available' %}active{% endif %}" 
+            href="{{ url_for('k8s_challenges.dashboard', tab='available') }}">
                 <i class="fas fa-list"></i> Available Challenges
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="deployed-tab" data-toggle="tab" href="#deployed" role="tab">
+            <a class="nav-link {% if active_tab == 'deployed' %}active{% endif %}" 
+            href="{{ url_for('k8s_challenges.dashboard', tab='deployed') }}">
                 <i class="fas fa-server"></i> My Deployments
             </a>
         </li>
@@ -41,7 +43,7 @@
 
     <div class="tab-content pt-4" id="k8sTabsContent">
         
-        <div class="tab-pane fade show active" id="available" role="tabpanel">
+        <div class="tab-pane fade {% if active_tab == 'available' %}show active{% endif %}" id="available" role="tabpanel">
             <div class="row">
                 {% if available %}
                     {% for chal in available %}
@@ -74,7 +76,7 @@
             </div>
         </div>
 
-        <div class="tab-pane fade" id="deployed" role="tabpanel">
+        <div class="tab-pane fade {% if active_tab == 'deployed' %}show active{% endif %}" id="deployed" role="tabpanel">
             <div class="table-responsive">
                 <table class="table table-hover border">
                     <thead class="thead-light">
@@ -164,28 +166,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabLinks = document.querySelectorAll('#k8sTabs .nav-link');
-        const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
-        tabLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                tabLinks.forEach(l => l.classList.remove('active'));                
-                tabPanes.forEach(p => {
-                    p.classList.remove('show', 'active');
-                });
-                this.classList.add('active');
-                const targetId = this.getAttribute('href').substring(1);
-                const targetPane = document.getElementById(targetId);
-                
-                if (targetPane) {
-                    targetPane.classList.add('show', 'active');
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

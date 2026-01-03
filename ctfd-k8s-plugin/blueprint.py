@@ -12,72 +12,51 @@ def _get_user_id(user):
 @k8s_bp.route('/dashboard', methods=['GET'])
 @authed_only
 def dashboard():
-    print("\n" + "="*20)
-    print("Reloading bashboard!")
-    print("="*20 + "\n")
-    
     user = get_current_user()
     k8s_user_id = _get_user_id(user)
+    active_tab = request.args.get('tab', 'available')
+    
     available_challenges = []
     my_deployments = []
-    headers = {
-        "Host": K8S_API_HOST,
-        "Accept": "application/json"
-    }
-    print(f"Checking API for user: {k8s_user_id}")
-    try:
-        print(f"Requesting: {K8S_API_URL}/dependencies")
-        resp = requests.get(f"{K8S_API_URL}/dependencies", headers=headers, timeout=5)
-        print(f"API HTTP Response Code: {resp.status_code}")
-        if resp.status_code == 200:
-            available_challenges = resp.json()
-            print(f"Challenges received: {available_challenges}")
-        elif resp.status_code >= 400:
-            flash(f"Error trying to load the CTF challenges. Status code: {resp.status_code}", "danger")
-    except Exception as e:
-        flash(f"Error loading the CTF challenges: {e}", "danger")
-    try:
-        resp = requests.get(
-            f"{K8S_API_URL}/deployment",
-            params={'user_id': k8s_user_id},
-            headers=headers,
-            timeout=5
-        )
-        if resp.status_code == 200:
-            data_deploy = resp.json()
-            my_deployments = data_deploy if isinstance(data_deploy, list) else []
-            
-            for dep in my_deployments:
-                dep['connection_info'] = {}                 
-                release = dep.get('release_name', '')
-                challenge_name = release.split('-', 1)[1] if '-' in release else release
-                dep['challenge_name'] = challenge_name
-                print(f"Checking endpoints for: {challenge_name}")
-                try:
-                    ep_resp = requests.get(
-                        f"{K8S_API_URL}/deployment/endpoint", 
-                        params={'user_id': k8s_user_id, 'challenge_name': challenge_name},
-                        headers=headers,
-                        timeout=5
-                    )
-                    print(ep_resp.json())
-                    if ep_resp.status_code == 200:
-                        ep_data = ep_resp.json()
-                        if isinstance(ep_data, list):
-                            dep['connection_info'] = ep_data
-                        elif isinstance(ep_data, dict):
-                            dep['connection_info'] = [ep_data]
-                except Exception as e:
-                    print(f"DEBUG: Silent error for endpoint {challenge_name}: {e}")
-    except Exception as e:
-        print(f"DEBUG: Critical failure retrieving deployments: {e}")
-        flash("Error trying to obtain your active deployments.", "danger")
+    headers = {"Host": K8S_API_HOST, "Accept": "application/json"}
+
+    if active_tab == 'available':
+        try:
+            resp = requests.get(f"{K8S_API_URL}/dependencies", headers=headers, timeout=5)
+            if resp.status_code == 200:
+                available_challenges = resp.json()
+        except Exception as e:
+            flash(f"Error loading challenges: {e}", "danger")
+
+    elif active_tab == 'deployed':
+        try:
+            resp = requests.get(f"{K8S_API_URL}/deployment", params={'user_id': k8s_user_id}, headers=headers, timeout=5)
+            if resp.status_code == 200:
+                my_deployments = resp.json() if isinstance(resp.json(), list) else []                
+                for dep in my_deployments:
+                    release = dep.get('release_name', '')
+                    challenge_name = release.split('-', 1)[1] if '-' in release else release
+                    dep['challenge_name'] = challenge_name
+                    try:
+                        ep_resp = requests.get(
+                            f"{K8S_API_URL}/deployment/endpoint", 
+                            params={'user_id': k8s_user_id, 'challenge_name': challenge_name},
+                            headers=headers, timeout=5
+                        )
+                        if ep_resp.status_code == 200:
+                            data = ep_resp.json()
+                            dep['connection_info'] = data if isinstance(data, list) else [data]
+                    except:
+                        pass
+        except Exception as e:
+            flash("Error loading deployments.", "danger")
 
     return render_template(
         'k8s_dashboard.html', 
         available=available_challenges, 
         deployed=my_deployments,
-        host=K8S_API_HOST
+        host=K8S_API_HOST,
+        active_tab=active_tab
     )
 
 @k8s_bp.route('/deploy', methods=['POST'])
