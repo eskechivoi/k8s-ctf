@@ -11,9 +11,13 @@ spec:
   - Ingress
   ingress:
   - from:
+    {{- if .Values.global.networkPolicies.protectApi.frontendLabels }}
+    {{- range .Values.global.networkPolicies.protectApi.frontendLabels }}
     - podSelector:
         matchLabels:
-          {{- toYaml .Values.global.networkPolicies.protectApi.frontendLabels | nindent 10 }}   
+          {{- toYaml . | nindent 10 }}
+    {{- end }}
+    {{- end }}
     {{- range .Values.global.networkPolicies.protectApi.allowedCidr }}
     - ipBlock:
         cidr: {{ . }}

@@ -6,7 +6,6 @@ global:
     minReplicas: 1
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
 
   serviceAccount:
     create: true
@@ -41,23 +40,6 @@ global:
           cpu: 250m
           memory: 512Mi
 
-    frontend:
-      enabled: true
-      replicaCount: 1
-      podAnnotations: {}
-      podLabels: {}
-      podSecurityContext: {}
-      securityContext: {}
-      resources:
-        limits:
-          cpu: 100m
-          memory: 128Mi
-        requests:
-          cpu: 100m
-          memory: 128Mi
-      volumes: []
-      volumeMounts: []
-
   gateway:
     gatewayName: "commons-gateway"
     className: "nginx"
@@ -69,7 +51,5 @@ global:
       name: "api-allow-only-frontend"
       apiLabels:
         app.kubernetes.io/name: ctf-api
-      frontendLabels:
-        app.kubernetes.io/name: ctf-frontend
       allowedCidr:
         - 127.0.0.1/32

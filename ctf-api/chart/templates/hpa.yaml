@@ -11,7 +11,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "k8s-parent-chart.fullname" . }}
+    name: {{ include "cft-api.fullname" . }}
   minReplicas: {{ .Values.global.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.global.autoscaling.maxReplicas }}
   metrics:
