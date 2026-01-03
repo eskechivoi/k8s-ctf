@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <div class="container">
+        <h1>Kubernetes Challenge Labs</h1>
+        <p class="lead">Deploy CTF challenges.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissable" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="k8sTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="available-tab" data-toggle="tab" href="#available" role="tab">
+                <i class="fas fa-list"></i> Available Challenges
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="deployed-tab" data-toggle="tab" href="#deployed" role="tab">
+                <i class="fas fa-server"></i> My Deployments
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content pt-4" id="k8sTabsContent">
+        
+        <div class="tab-pane fade show active" id="available" role="tabpanel">
+            <div class="row">
+                {% if available %}
+                    {% for chal in available %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">{{ chal.alias or chal.name }}</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <p class="card-text text-muted small">ID: {{ chal.name }}</p>
+                                <p class="card-text">Version: <span class="badge badge-secondary">{{ chal.version }}</span></p>
+                                <div class="mt-auto">
+                                    <form action="{{ url_for('k8s_challenges.deploy_challenge') }}" method="POST">
+                                        <input type="hidden" name="challenge_name" value="{{ chal.name }}">
+                                        <button type="submit" class="btn btn-primary btn-block">
+                                            <i class="fas fa-rocket"></i> Deploy Instance
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-12 text-center py-5">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No challenges available to deploy right now.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="deployed" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover border">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Challenge / Release</th>
+                            <th>Status</th>
+                            <th>Connection Endpoint</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if deployed %}
+                            {% for dep in deployed %}
+                            <tr>
+                                <td class="align-middle">
+                                    <span class="d-block font-weight-bold">{{ dep.release_name }}</span>
+                                    <small class="text-muted">{{ dep.chart }}</small>
+                                </td>
+                                <td class="align-middle">
+                                    {% if dep.status == 'deployed' %}
+                                        <span class="badge badge-success px-3 py-2"><i class="fas fa-check"></i> Ready</span>
+                                    {% elif dep.status == 'pending-install' %}
+                                        <span class="badge badge-info px-3 py-2"><i class="fas fa-sync fa-spin"></i> Pending...</span>
+                                    {% else %}
+                                        <span class="badge badge-warning px-3 py-2">{{ dep.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle">
+                                    {% if dep.connection_info and dep.connection_info.node_port %}
+                                        <div class="p-2 bg-dark text-white rounded shadow-sm">
+                                            <i class="fas fa-link text-info mr-2"></i>
+                                            <code>Port: {{ dep.connection_info.node_port }}</code>
+                                            {% if dep.connection_info.path %}
+                                                <div class="small text-info mt-1">{{ dep.connection_info.path }}</div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-muted small">
+                                            {% if dep.status == 'deployed' %}
+                                                <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Endpoint error</span>
+                                            {% else %}
+                                                <i class="fas fa-hourglass-start"></i> Waiting for endpoint...
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    <form action="{{ url_for('k8s_challenges.deploy_challenge') }}" method="POST"
+                                          onsubmit="return confirm('WARNING: This will permanently destroy your instance. Continue?');">
+                                        <input type="hidden" name="challenge_name" value="{{ dep.release_name }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash-alt"></i> Destroy
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <p class="text-muted mb-0">You don't have any active deployments.</p>
+                                    <small>Go to the "Available" tab to start one.</small>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabLinks = document.querySelectorAll('#k8sTabs .nav-link');
+        const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                tabLinks.forEach(l => l.classList.remove('active'));                
+                tabPanes.forEach(p => {
+                    p.classList.remove('show', 'active');
+                });
+                this.classList.add('active');
+                const targetId = this.getAttribute('href').substring(1);
+                const targetPane = document.getElementById(targetId);
+                
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
