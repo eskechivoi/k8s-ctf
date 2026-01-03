@@ -90,7 +90,11 @@
                             {% for dep in deployed %}
                             <tr>
                                 <td class="align-middle">
-                                    <span class="d-block font-weight-bold">{{ dep.release_name }}</span>
+                                    {% if dep.challenge_name %}
+                                        <span class="d-block font-weight-bold">{{ dep.challenge_name }}</span>
+                                    {% else %}
+                                        <span class="d-block font-weight-bold">{{ dep.release_name }}</span>
+                                    {% endif %}
                                     <small class="text-muted">{{ dep.chart }}</small>
                                 </td>
                                 <td class="align-middle">
@@ -103,14 +107,28 @@
                                     {% endif %}
                                 </td>
                                 <td class="align-middle">
-                                    {% if dep.connection_info and dep.connection_info.node_port %}
-                                        <div class="p-2 bg-dark text-white rounded shadow-sm">
-                                            <i class="fas fa-link text-info mr-2"></i>
-                                            <code>Port: {{ dep.connection_info.node_port }}</code>
-                                            {% if dep.connection_info.path %}
-                                                <div class="small text-info mt-1">{{ dep.connection_info.path }}</div>
+                                    {% if dep.connection_info %}
+                                        {% for conn in dep.connection_info %}
+                                            {% if conn.path %}
+                                            <div class="p-2 bg-dark text-white rounded shadow-sm">
+                                                {# <i class="fas fa-link text-info mr-2"></i> #}
+                                                {% if conn.node_port %}
+                                                    <code>Port: {{ conn.node_port }}</code>
+                                                {% endif %}
+                                                <a class="small text-info mt-1" href="http://{{ '{}{}'.format(host, conn.path) }}" target="_blank">
+                                                    <u>{{ host }}{{ conn.path }}</u>
+                                                </a>
+                                            </div>
+                                            {% else %}
+                                            <div class="text-muted small">
+                                                {% if dep.status == 'deployed' %}
+                                                    <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Endpoint error</span>
+                                                {% else %}
+                                                    <i class="fas fa-hourglass-start"></i> Waiting for endpoint...
+                                                {% endif %}
+                                            </div>
                                             {% endif %}
-                                        </div>
+                                        {% endfor %}
                                     {% else %}
                                         <div class="text-muted small">
                                             {% if dep.status == 'deployed' %}
