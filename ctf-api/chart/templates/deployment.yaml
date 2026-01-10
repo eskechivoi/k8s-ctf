@@ -36,10 +36,22 @@ spec:
         - name: "challenge-commons-downloader"
           image: "{{ .Values.downloader.repository }}:{{ .Values.downloader.tag }}"
           imagePullPolicy: {{ .Values.downloader.pullPolicy }}
+          {{- if .Values.global.configuration.api.commonsFromHost.enabled }}
+          command: 
+            - "/bin/sh"
+            - "-c"
+            - "cp -r /host /mnt"
+          {{- else }}
           command: {{ .Values.initCommand | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts: 
             - name: challenge-commons
-              mountPath: /mnt 
+              mountPath: /mnt
+            {{- if .Values.global.configuration.api.commonsFromHost.enabled }}
+            - name: commons-host-volume
+              readOnly: true
+              mountPath: /host
+            {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.global.configuration.api.securityContext }}
@@ -81,6 +93,11 @@ spec:
         - name: challenge-commons
           emptyDir:
             sizeLimit: 1Gi
+        {{- if .Values.global.configuration.api.commonsFromHost.enabled }}
+        - name: commons-host-volume
+          hostPath:
+            path: {{ .Values.global.configuration.api.commonsFromHost.hostPath }}
+        {{- end }}
       {{- with .Values.global.configuration.api.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

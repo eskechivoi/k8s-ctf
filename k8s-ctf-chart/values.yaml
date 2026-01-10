@@ -32,6 +32,9 @@ global:
       podLabels: {}
       podSecurityContext: {}
       securityContext: {}
+      commonsFromHost: 
+        enabled: true
+        hostPath: ""
       resources:
         limits:
           cpu: 500m
