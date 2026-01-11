@@ -19,12 +19,6 @@ installerRoleName: helm-installer-role
 serviceAccountName: helm-deployer-sa
 roleBindingName: helm-installer-binding
 
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 8000
-  name: http
-
 livenessProbe:
   httpGet:
     path: /

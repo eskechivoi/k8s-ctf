@@ -42,8 +42,14 @@ global:
         requests:
           cpu: 250m
           memory: 512Mi
+      service:
+        type: ClusterIP
+        port: 80
+        targetPort: 8000
+        name: http
 
   gateway:
+    enabled: true
     gatewayName: "commons-gateway"
     className: "nginx"
     controllerName: "gateway.nginx.org/nginx-gateway-controller"

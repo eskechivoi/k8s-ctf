@@ -8,11 +8,11 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.global.configuration.api.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
+    - port: {{ .Values.global.configuration.api.service.port }}
+      targetPort: {{ .Values.global.configuration.api.service.targetPort }}
       protocol: TCP
-      name: {{ .Values.service.name }}
+      name: {{ .Values.global.configuration.api.service.name }}
   selector:
     {{- include "cft-api.selectorLabels" . | nindent 4 }}
