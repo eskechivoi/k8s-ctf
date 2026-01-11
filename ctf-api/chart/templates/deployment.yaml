@@ -68,8 +68,8 @@ spec:
             - name: "GATEWAY_API_NAMESPACE"
               value: {{ .Values.global.gateway.namespace }}
           ports:
-            - name: {{ .Values.service.name }}
-              containerPort: {{ .Values.service.targetPort }}
+            - name: {{ .Values.global.configuration.api.service.name }}
+              containerPort: {{ .Values.global.configuration.api.service.targetPort }}
               protocol: TCP
           {{- with .Values.global.configuration.api.livenessProbe }}
           livenessProbe:
