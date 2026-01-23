@@ -91,8 +91,8 @@ spec:
           {{- end }}
       volumes:
         - name: challenge-commons
-          emptyDir:
-            sizeLimit: 1Gi
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.storage.api.claimName }}
         {{- if .Values.global.configuration.api.commonsFromHost.enabled }}
         - name: commons-host-volume
           hostPath:

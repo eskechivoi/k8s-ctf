@@ -24,6 +24,14 @@ global:
   labels:
     application: "k8sctf"
   
+  storage:
+    storageClassName: "local-storage"
+    api:
+      claimName: "ctf-api-pvc"
+      accessModes:
+        - ReadWriteOnce
+      storage: 10Gi
+  
   configuration:
     api:
       enabled: true

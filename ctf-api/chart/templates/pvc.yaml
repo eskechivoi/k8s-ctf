@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.global.storage.api.claimName }}
+spec:
+  storageClassName: {{ .Values.global.storage.storageClassName }}
+  accessModes:
+  {{- toYaml .Values.global.storage.api.accessModes | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.storage.api.storage }}
