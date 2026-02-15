@@ -59,7 +59,7 @@
                                 </h5>
                             </div>
                             <div class="card-body d-flex flex-column">
-                                <p class="card-text text-muted small">Description: {{ chal.description }}</p>
+                                <!-- <p class="card-text text-muted small">Description: {{ chal.description }}</p> --> 
                                 <p class="card-text">Version: <span class="badge badge-secondary">{{ chal.version }}</span></p>
                                 <div class="mt-auto">
                                     <form action="{{ url_for('k8s_challenges.deploy_challenge') }}" method="POST" 
