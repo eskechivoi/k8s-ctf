@@ -28,8 +28,8 @@ spec:
         - type: URLRewrite
           urlRewrite:
             path:
-              type: ReplaceFullPath
-              replaceFullPath: "/"
+              type: ReplacePrefixMatch
+              replacePrefixMatch: "/"
       backendRefs:
         - name: "{{ include "challenge.fullname" $ }}-service"
           port: {{ .port | default $.Values.service.port }}

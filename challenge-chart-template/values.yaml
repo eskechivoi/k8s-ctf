@@ -1,3 +1,5 @@
+enabled: false # IMPORTANT! If not, the challenge will be present in ALL deployments
+
 image:
   repository: nginx
   pullPolicy: IfNotPresent

@@ -1,5 +1,6 @@
 apiVersion: v2
-name: ctfChallengeName
+alias: NameInPascalCase
+name: name-in-kebab-case
 description: CTF challenges
 type: application
 version: 0.1.0
