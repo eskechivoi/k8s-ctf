@@ -46,13 +46,17 @@ def add_dependency(file_path, new_dependency_config):
             'description': 'Parent Chart for CTF challenges',
             'version': '0.1.0',
             'appVersion': '0.1.0',
-            'dependencies': []
+            'dependencies': [],
+            'annotations': {}
         }
+
+    if 'annotations' not in chart_data:
+        chart_data['annotations'] = {}
+
     dependencies = chart_data.get('dependencies', [])
-    
     chart_name = new_dependency_config['name']
-    if 'alias' not in new_dependency_config:
-        new_dependency_config['alias'] = chart_name
+    custom_alias = new_dependency_config.pop('alias', chart_name)
+    chart_data['annotations'][f'challenge.alias/{chart_name}'] = custom_alias
     if 'condition' not in new_dependency_config:
         new_dependency_config['condition'] = f'{chart_name}.enabled'
 
@@ -62,4 +66,5 @@ def add_dependency(file_path, new_dependency_config):
     chart_data['dependencies'] = dependencies
     
     write_chart_yaml(file_path, chart_data)
+    new_dependency_config['annotations'][f'challenge.alias/{chart_name}'] = custom_alias
     return new_dependency_config

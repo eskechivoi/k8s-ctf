@@ -46,8 +46,16 @@ def get_dependencies_controller():
         return jsonify([])
 
     dependencies = chart_data.get('dependencies', [])
-    app.logger.info(f"Read dependencies: {len(dependencies)}")
-    return jsonify(dependencies)
+    annotations = chart_data.get('annotations', {})
+    enriched_dependencies = []
+    for dep in dependencies:
+        name = dep.get('name')
+        alias = annotations.get(f'challenge.alias/{name}', name)
+        dep_copy = dep.copy()
+        dep_copy['alias'] = alias
+        enriched_dependencies.append(dep_copy)
+    app.logger.info(f"Read dependencies: {len(enriched_dependencies)}")
+    return jsonify(enriched_dependencies)
 
 def add_dependency_controller():
     """
@@ -114,11 +122,13 @@ def add_dependency_controller():
              raise FileNotFoundError(f"Could not read Chart.yaml from the extracted path: {unpacked_chart_dir}")        
         real_chart_name = uploaded_chart_data.get('name')
         real_chart_version = uploaded_chart_data.get('version')
-        real_chart_alias = uploaded_chart_data.get('alias')
+        annotations = uploaded_chart_data.get('annotations', {})
+        real_chart_alias = annotations.get('alias')
         real_chart_description = uploaded_chart_data.get('description')
         if not real_chart_name or not real_chart_version:
              raise ValueError("Chart.yaml in uploaded file is missing 'name' or 'version'.")
         app.logger.info(f"Read Chart details: Name={real_chart_name}, Version={real_chart_version}")
+        app.logger.info(f"Read Chart details: Alias={real_chart_alias}")
     except tarfile.TarError as e:
         app.logger.error(f"Error uncompressing the chart: {e}")
         return jsonify({"error": "Uploaded file is not a valid Helm tar.gz file or its structure is invalid."}), 400
@@ -135,6 +145,7 @@ def add_dependency_controller():
         'alias': real_chart_alias,
         'version': real_chart_version,
         'description': real_chart_description,
+        'annotations': {},
     }
     try:
         new_dependency = add_dependency(chart_yaml_path, new_dependency_config)
