@@ -113,7 +113,9 @@ def add_dependency_controller():
         if not uploaded_chart_data:
              raise FileNotFoundError(f"Could not read Chart.yaml from the extracted path: {unpacked_chart_dir}")        
         real_chart_name = uploaded_chart_data.get('name')
-        real_chart_version = uploaded_chart_data.get('version')  
+        real_chart_version = uploaded_chart_data.get('version')
+        real_chart_alias = uploaded_chart_data.get('alias')
+        real_chart_description = uploaded_chart_data.get('description')
         if not real_chart_name or not real_chart_version:
              raise ValueError("Chart.yaml in uploaded file is missing 'name' or 'version'.")
         app.logger.info(f"Read Chart details: Name={real_chart_name}, Version={real_chart_version}")
@@ -130,7 +132,9 @@ def add_dependency_controller():
     # --- 3. Add new dependency to parent Chart ---
     new_dependency_config = {
         'name': real_chart_name,
+        'alias': real_chart_alias,
         'version': real_chart_version,
+        'description': real_chart_description,
     }
     try:
         new_dependency = add_dependency(chart_yaml_path, new_dependency_config)
