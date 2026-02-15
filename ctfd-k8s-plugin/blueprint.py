@@ -2,7 +2,7 @@ import requests
 from flask import Blueprint, render_template, request, jsonify, session, flash, redirect, url_for
 from CTFd.utils.decorators import authed_only
 from CTFd.utils.user import get_current_user
-from CTFd.plugins.ctfd_k8s_plugin.config import K8S_API_URL, K8S_API_HOST, K8S_API_HOST_INTERNAL
+from CTFd.plugins.ctfd_k8s_plugin.config import K8S_API_URL, K8S_API_HOST, K8S_API_LOAD_BALANCER
 
 k8s_bp = Blueprint('k8s_challenges', __name__, template_folder='templates', url_prefix='/k8s')
 
@@ -55,7 +55,8 @@ def dashboard():
         'k8s_dashboard.html', 
         available=available_challenges, 
         deployed=my_deployments,
-        host=K8S_API_HOST_INTERNAL,
+        host=K8S_API_LOAD_BALANCER,
+        host_internal=K8S_API_HOST_INTERNAL,
         active_tab=active_tab
     )
 

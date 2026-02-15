@@ -117,11 +117,13 @@
                                             <div class="p-2 bg-dark text-white rounded shadow-sm">
                                                 {# <i class="fas fa-link text-info mr-2"></i> #}
                                                 {% if conn.node_port %}
-                                                    <code>Port: {{ conn.node_port }}</code>
-                                                {% endif %}
-                                                <a class="small text-info mt-1" href="http://{{ '{}{}'.format(host, conn.path) }}" target="_blank">
+                                                <span>IP: {{ host_internal }} - </span>
+                                                <code>Port: {{ conn.node_port }}</code>
+                                                {% else %}
+                                                <a class="small text-info mt-1" href="http://{{ '{}{}'.format(host, conn.path) }}/" target="_blank">
                                                     <u>{{ host }}{{ conn.path }}</u>
                                                 </a>
+                                                {% endif %}
                                             </div>
                                             {% else %}
                                             <div class="text-muted small">
