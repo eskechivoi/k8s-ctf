@@ -1,10 +1,14 @@
 import requests
 from flask import Blueprint, render_template, request, jsonify, session, flash, redirect, url_for
+from CTFd.plugins.ctfd_k8s_plugin import limiter
+from CTFd.utils.dates import ctf_has_started
 from CTFd.utils.decorators import authed_only
-from CTFd.utils.user import get_current_user
+from CTFd.utils.user import get_current_user, is_admin
 from CTFd.plugins.ctfd_k8s_plugin.config import K8S_API_URL, K8S_API_HOST, K8S_API_LOAD_BALANCER, K8S_API_HOST_INTERNAL
 
 k8s_bp = Blueprint('k8s_challenges', __name__, template_folder='templates', url_prefix='/k8s')
+
+GENERIC_CONNECTION_ERROR = "Connection error to the Kubernetes CTF API. Please contact a CTFd admin."
 
 def _get_user_id(user):
     return f"user{user.id}"
@@ -19,6 +23,10 @@ def dashboard():
     available_challenges = []
     my_deployments = []
     headers = {"Host": K8S_API_HOST, "Accept": "application/json"}
+
+    if not ctf_has_started() and not is_admin():
+        available_challenges = [] 
+        flash("The CTF event has not yet started.", "info")
 
     if active_tab == 'available':
         try:
@@ -62,7 +70,14 @@ def dashboard():
 
 @k8s_bp.route('/deploy', methods=['POST'])
 @authed_only
+@limiter.limit(
+    "3 per minute",
+    error_message="You have exceeded the maximum number of challenges that can be deployed per minute (3)."
+)
 def deploy_challenge():
+    if not ctf_has_started() and not is_admin():
+        return jsonify({"error": "The CTF event has not yet started."}), 403
+
     user = get_current_user()
     challenge_name = request.form.get('challenge_name')
     if not challenge_name:
@@ -97,12 +112,20 @@ def deploy_challenge():
     except requests.exceptions.Timeout:
         flash("The deployment is taking too long, but it might still be processing in the background. Check 'My Deployments' in a minute.", "warning")
     except Exception as e:
-        flash(f"Connection error: {str(e)}", "danger")
+        flash(GENERIC_CONNECTION_ERROR, "danger")
+        app.logger.error(e)
     return redirect(url_for('k8s_challenges.dashboard', tab='deployed'))
 
 @k8s_bp.route('/terminate', methods=['POST'])
 @authed_only
+@limiter.limit(
+    "3 per minute",
+    error_message="You have exceeded the maximum number of challenges that can be terminated per minute (3)."
+)
 def terminate_challenge():
+    if not ctf_has_started() and not is_admin():
+        return jsonify({"error": "The CTF event has not yet started."}), 403
+    
     user = get_current_user()
     release_name = request.form.get('challenge_name') 
     payload = {
@@ -123,5 +146,12 @@ def terminate_challenge():
             error_msg = data.get('error', f"API Error (Status {resp.status_code})")
             flash(f"Failed to terminate: {error_msg}", "danger")
     except Exception as e:
-        flash(f"Network error: {str(e)}", "danger")
+        flash(GENERIC_CONNECTION_ERROR, "danger")
+        app.logger.error(e)
     return redirect(url_for('k8s_challenges.dashboard', tab='deployed'))
+
+@k8s_bp.errorhandler(429)
+def ratelimit_handler(e):
+    message = e.description if e.description else "Maximum number of requests per minute to the API exceeded (max. is 3)."
+    flash(message, "danger")
+    return redirect(url_for('k8s_challenges.dashboard'))
