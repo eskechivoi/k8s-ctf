@@ -1,6 +1,6 @@
 import requests
 from flask import Blueprint, render_template, request, jsonify, session, flash, redirect, url_for
-from CTFd.plugins.ctfd_k8s_plugin import limiter
+from CTFd.plugins.ctfd_k8s_plugin.extensions import limiter
 from CTFd.utils.dates import ctf_has_started
 from CTFd.utils.decorators import authed_only
 from CTFd.utils.user import get_current_user, is_admin
