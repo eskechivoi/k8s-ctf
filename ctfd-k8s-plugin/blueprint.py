@@ -10,9 +10,6 @@ k8s_bp = Blueprint('k8s_challenges', __name__, template_folder='templates', url_
 
 GENERIC_CONNECTION_ERROR = "Connection error to the Kubernetes CTF API. Please contact a CTFd admin."
 
-def _get_user_id(user):
-    return f"user{user.id}"
-
 @k8s_bp.route('/dashboard', methods=['GET'])
 @authed_only
 def dashboard():
@@ -92,28 +89,7 @@ def deploy_challenge():
         "Host": K8S_API_HOST,
         "Accept": "application/json"
     }
-    try:
-        resp = requests.post(
-            f"{K8S_API_URL}/deployment", 
-            json=payload, 
-            headers=headers, 
-            timeout=45 
-        )        
-        try:
-            data = resp.json()
-        except ValueError:
-            data = {}
-        if resp.status_code == 200:
-            msg = data.get('message', f"Challenge '{challenge_name}' deployment started!")
-            flash(msg, "success")
-        else:
-            error_msg = data.get('error', f"Error {resp.status_code}: {resp.text[:100]}")
-            flash(f"Failed to deploy: {error_msg}", "danger")
-    except requests.exceptions.Timeout:
-        flash("The deployment is taking too long, but it might still be processing in the background. Check 'My Deployments' in a minute.", "warning")
-    except Exception as e:
-        flash(GENERIC_CONNECTION_ERROR, "danger")
-        app.logger.error(e)
+    call_k8s_api('deployment', method="POST", json_data=payload, headers=headers)
     return redirect(url_for('k8s_challenges.dashboard', tab='deployed'))
 
 @k8s_bp.route('/terminate', methods=['POST'])
@@ -133,21 +109,7 @@ def terminate_challenge():
         'challenge_name': release_name
     }
     headers = {"Host": K8S_API_HOST}
-    try:
-        resp = requests.delete(f"{K8S_API_URL}/deployment", json=payload, headers=headers, timeout=30)        
-        try:
-            data = resp.json()
-        except ValueError:
-            data = {}
-        if resp.status_code == 200:
-            msg = data.get('message', 'Terminated successfully')
-            flash(f"Success: {msg}", "success")
-        else:
-            error_msg = data.get('error', f"API Error (Status {resp.status_code})")
-            flash(f"Failed to terminate: {error_msg}", "danger")
-    except Exception as e:
-        flash(GENERIC_CONNECTION_ERROR, "danger")
-        app.logger.error(e)
+    call_k8s_api('deployment', method="DELETE", json_data=payload, headers=headers)
     return redirect(url_for('k8s_challenges.dashboard', tab='deployed'))
 
 @k8s_bp.errorhandler(429)
