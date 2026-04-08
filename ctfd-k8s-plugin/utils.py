@@ -1,5 +1,6 @@
 import time
 import requests
+from flask import flash, current_app
 from CTFd.utils import get_config
 from CTFd.plugins.ctfd_k8s_plugin.config import K8S_API_URL, K8S_API_HOST
 
@@ -20,31 +21,41 @@ def _get_user_id(user):
 def ctf_has_started():
     start = get_config("start")
     if start:
-        return int(start) < int(time.time())
+        try:
+            return int(start) < int(time.time())
+        except (ValueError, TypeError):
+            return True
     return True
 
 def call_k8s_api(endpoint, method='GET', json_data=None, headers=None, params=None, timeout=45):
-    """Utility function to centralize calls to k8s-ctf API."""
     try:
         resp = requests.request(
             method=method,
             url=f"{K8S_API_URL}/{endpoint}", 
             json=json_data, 
             headers=headers, 
+            params=params,
             timeout=timeout
         )        
+
         try:
             data = resp.json()
         except ValueError:
             data = {}
+
         if resp.status_code == 200:
-            msg = data.get('message', f"Challenge '{challenge_name}' {ACTION_SUCCESS_MSGS[method]}")
+            challenge_name = json_data.get('challenge_name') if json_data else None
+            if challenge_name:
+                msg = f"Challenge '{challenge_name}' {ACTION_SUCCESS_MSGS.get(method, 'processed successfully')}."
+            else:
+                msg = f"Action {ACTION_SUCCESS_MSGS.get(method, 'completed')}."
             flash(msg, "success")
         else:
             error_msg = data.get('error', f"Error {resp.status_code}: {resp.text[:100]}")
-            flash(f"{ACTION_FAILED_MSGS[method]}: {error_msg}", "danger")
+            flash(f"{ACTION_FAILED_MSGS.get(method, 'Action failed')}: {error_msg}", "danger")
+            
     except requests.exceptions.Timeout:
-        flash("The deployment is taking too long, but it might still be processing in the background. Check 'My Deployments' in a minute.", "warning")
+        flash("The deployment is taking too long, but it might still be processing in the background.", "warning")
     except Exception as e:
         flash(GENERIC_CONNECTION_ERROR, "danger")
-        app.logger.error(e)
+        current_app.logger.error(f"K8S Plugin Error: {e}")
