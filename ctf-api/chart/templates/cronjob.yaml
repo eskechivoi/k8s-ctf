@@ -2,19 +2,19 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ .Values.challengeCleaner.name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
   {{- with .Values.global.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  schedule: {{ .Values.challengeCleaner.schedule }}
+  schedule: {{ .Values.challengeCleaner.schedule | quote }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: {{ .Values.serviceAccountName }}
+          serviceAccountName: {{ .Values.serviceAccountName | default "default" }}
           containers:
           - name: {{ .Values.challengeCleaner.name }}
             image: {{ .Values.challengeCleaner.image.repository }}:{{ .Values.challengeCleaner.image.tag }}
@@ -24,7 +24,6 @@ spec:
             - |
               NOW=$(date +%s)
               LIMIT=1200
-
               helm list -n ctf-challenges -o json | \
                 awk -v now="$NOW" -v limit="$LIMIT" '
                 BEGIN { RS="}," }
@@ -44,4 +43,4 @@ spec:
                     }
                   }
                 }' | xargs -r helm uninstall -n ctf-challenges
-          restartPolicy: {{ .Values.challengeCleaner.restartPolicy }}
+          restartPolicy: {{ .Values.challengeCleaner.restartPolicy | default "OnFailure" }}
