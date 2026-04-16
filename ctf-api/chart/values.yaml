@@ -3,6 +3,14 @@ image:
   pullPolicy: IfNotPresent
   tag: "0.1.0"
 
+challengeCleaner:
+  name: "challengeCleaner"
+  schedule: "*/5 * * * *"
+  restartPolicy: OnFailure
+  image:
+    repository: "alpine/helm"
+    tag: "3.19"
+
 downloader:
   repository: alpine/git
   pullPolicy: IfNotPresent

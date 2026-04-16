@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.challengeCleaner.name }}
+  namespace: {{ .Values.global.namespace }}
+  {{- with .Values.global.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ .Values.challengeCleaner.schedule }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccountName }}
+          containers:
+          - name: {{ .Values.challengeCleaner.name }}
+            image: {{ .Values.challengeCleaner.image.repository }}:{{ .Values.challengeCleaner.image.tag }}
+            command:
+            - /bin/sh
+            - -c
+            - |
+              NOW=$(date +%s)
+              LIMIT=1200
+
+              helm list -n ctf-challenges -o json | \
+                awk -v now="$NOW" -v limit="$LIMIT" '
+                BEGIN { RS="}," }
+                {
+                  if (match($0, /"name":"[^"]+"/)) {
+                    name = substr($0, RSTART+8, RLENGTH-9)
+                    if (match($0, /"updated":"[^"]+"/)) {
+                      date_str = substr($0, RSTART+11, 19)
+                      sub(/ /, "T", date_str)
+                      cmd = "date -d " date_str " +%s"
+                      if ((cmd | getline timestamp) > 0) {
+                        if (now - timestamp > limit) {
+                          print name
+                        }
+                      }
+                      close(cmd)
+                    }
+                  }
+                }' | xargs -r helm uninstall -n ctf-challenges
+          restartPolicy: {{ .Values.challengeCleaner.restartPolicy }}
